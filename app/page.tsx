@@ -2,9 +2,10 @@
 
 
 import { useCallback, useEffect, useState } from 'react';
-import { AlertCircle, RefreshCw, RotateCcw } from 'lucide-react';
+import { AlertCircle, RefreshCw } from 'lucide-react';
 import { Header } from '@/components/header';
 import { Footer } from '@/components/footer';
+import { PageNav } from '@/components/page-nav';
 import { DocumentUpload } from '@/components/document-upload';
 import { ResultsDisplay } from '@/components/results-display';
 import { LandingSection } from '@/components/landing-section';
@@ -194,6 +195,7 @@ export default function Home() {
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <Header language={language} onLanguageChange={setLanguage} />
+      <PageNav className="mt-2" />
 
       <main className="flex-1 mx-auto w-full max-w-4xl px-4 py-6 sm:py-8 sm:px-6 lg:px-8">
         

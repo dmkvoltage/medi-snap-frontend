@@ -65,9 +65,9 @@
     --input: 220 13% 22%;
 
     /* ─── Google Blue — Primary (tonal light) ─── */
-    --primary: 217 89% 73%;
-    --primary-foreground: 217 39% 12%;
-    --ring: 217 89% 73%;
+    --primary: 217 89% 61%;
+    --primary-foreground: 0 0% 100%;
+    --ring: 217 89% 61%;
 
     /* ─── Google Green — Secondary (tonal light) ─── */
     --secondary: 136 53% 59%;

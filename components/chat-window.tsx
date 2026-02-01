@@ -1,9 +1,7 @@
 'use client';
 
-import React from "react"
-
 import { useCallback, useRef, useState, useEffect } from 'react';
-import { Send, Loader2, MessageCircle } from 'lucide-react';
+import { Send, Loader2, MessageCircle, Paperclip, Image as ImageIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -33,6 +31,8 @@ export function ChatWindow({
   const [input, setInput] = useState('');
   const [localLoading, setLocalLoading] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const imageInputRef = useRef<HTMLInputElement>(null);
 
   // Auto-scroll to bottom
   useEffect(() => {
@@ -81,62 +81,113 @@ export function ChatWindow({
     handleSendQuestion(input);
   };
 
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.currentTarget.files;
+    if (files && files.length > 0) {
+      const names = Array.from(files).map((file) => file.name).join(', ');
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: Date.now().toString(),
+          role: 'user',
+          content: `Shared file(s): ${names}`,
+        },
+      ]);
+      e.currentTarget.value = '';
+    }
+  };
+
   return (
-    <div className="flex flex-col gap-3 rounded-2xl border border-border bg-muted/50">
+    <div className="flex flex-col gap-3 rounded-[28px] border border-border bg-background shadow-[0_12px_36px_rgba(0,0,0,0.08)] overflow-hidden">
+      {/* Header (inspired by the reference image, Google-branded palette) */}
+      <div className="px-4 sm:px-5 pt-4">
+        <div className="rounded-[22px] px-4 sm:px-5 py-3 sm:py-3.5 bg-gradient-to-br from-primary via-sky-500 to-cyan-500 text-white shadow-[0_10px_26px_rgba(66,133,244,0.35)]">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="h-10 w-10 rounded-full bg-white/20 ring-2 ring-white/40 flex items-center justify-center">
+                <span className="text-sm font-semibold">MS</span>
+              </div>
+              <div className="leading-tight">
+                <p className="text-xs text-white/80">Chat with</p>
+                <p className="text-sm sm:text-base font-semibold">MediSnap AI</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2 text-white/80">
+              <span className="inline-flex items-center gap-2 text-[10px] sm:text-xs">
+                <span className="h-2 w-2 rounded-full bg-green-300 animate-pulse" />
+                Online
+              </span>
+            </div>
+          </div>
+          <div className="mt-3 sm:mt-4 inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-1.5">
+            <span className="text-[10px] sm:text-xs">General info only</span>
+          </div>
+        </div>
+      </div>
       {/* Messages */}
       <ScrollArea
         ref={scrollRef}
-        className="h-64 sm:h-80 px-4 py-4 space-y-3"
+        className="h-64 sm:h-80 px-4 sm:px-5 py-4 space-y-3"
       >
-        {messages.length === 0 && (
-          <div className="flex flex-col items-center justify-center h-full text-center">
-            <div className="rounded-2xl bg-primary/10 p-3 mb-3">
-              <MessageCircle className="h-6 w-6 text-primary" aria-hidden="true" />
+        <div className="space-y-3">
+          {messages.length === 0 && (
+            <div className="flex flex-col items-center justify-center h-full text-center">
+              <div className="rounded-2xl bg-primary/10 p-3 mb-3">
+                <MessageCircle className="h-6 w-6 text-primary" aria-hidden="true" />
+              </div>
+              <p className="text-sm text-muted-foreground">
+                Ask a question to get started
+              </p>
             </div>
-            <p className="text-sm text-muted-foreground">
-              Ask a question to get started
-            </p>
-          </div>
-        )}
+          )}
 
-        {messages.map((message) => (
-          <div
-            key={message.id}
-            className={`flex gap-3 animate-in fade-in ${
-              message.role === 'user' ? 'justify-end' : 'justify-start'
-            }`}
-          >
+          {messages.map((message) => (
             <div
-              className={`max-w-xs sm:max-w-sm px-4 py-3 rounded-2xl text-sm leading-relaxed ${
-                message.role === 'user'
-                  ? 'bg-primary text-primary-foreground rounded-br-none'
-                  : 'bg-background border border-border text-foreground rounded-bl-none'
+              key={message.id}
+              className={`flex gap-3 animate-in fade-in ${
+                message.role === 'user' ? 'justify-end' : 'justify-start'
               }`}
             >
-              {message.content}
+              <div
+                className={`max-w-xs sm:max-w-sm px-4 py-3 rounded-2xl text-sm leading-relaxed ${
+                  message.role === 'user'
+                    ? 'bg-primary text-primary-foreground rounded-br-none shadow-[0_8px_18px_rgba(66,133,244,0.25)]'
+                    : 'bg-muted/40 border border-border text-foreground rounded-bl-none'
+                }`}
+              >
+                {message.content}
+              </div>
             </div>
-          </div>
-        ))}
+          ))}
 
-        {localLoading && (
-          <div className="flex gap-3 justify-start">
-            <div className="max-w-xs sm:max-w-sm px-4 py-3 rounded-2xl bg-background border border-border rounded-bl-none">
-              <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+          {localLoading && (
+            <div className="flex gap-3 justify-start">
+              <div className="max-w-xs sm:max-w-sm px-4 py-3 rounded-2xl bg-background border border-border rounded-bl-none">
+                <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+              </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </ScrollArea>
 
       {/* Suggested Questions */}
       {messages.length === 0 && (
-        <div className="px-4 pb-3 space-y-2">
-          <p className="text-xs text-muted-foreground font-medium">Quick Questions:</p>
+        <div className="px-4 sm:px-5 pb-3 space-y-2">
+          <p className="text-xs text-muted-foreground font-medium">Quick Questions</p>
           <div className="flex flex-wrap gap-2">
-            {suggestedQuestions.map((q) => (
+            {suggestedQuestions.map((q, index) => (
               <button
                 key={q}
                 onClick={() => handleSendQuestion(q)}
-                className="text-xs px-3 py-2 rounded-full bg-background hover:bg-muted border border-border transition-colors"
+                className={`text-xs px-3 py-2 rounded-full border transition-all ${
+                  index % 4 === 0
+                    ? 'border-primary/40 text-primary hover:bg-primary/10'
+                    : index % 4 === 1
+                    ? 'border-destructive/40 text-destructive hover:bg-destructive/10'
+                    : index % 4 === 2
+                    ? 'border-accent/60 text-foreground hover:bg-accent/20'
+                    : 'border-secondary/40 text-secondary hover:bg-secondary/10'
+                }`}
               >
                 {q}
               </button>
@@ -146,20 +197,55 @@ export function ChatWindow({
       )}
 
       {/* Input */}
-      <form onSubmit={handleSubmit} className="p-4 border-t border-border">
-        <div className="flex gap-2">
+      <form onSubmit={handleSubmit} className="p-4 sm:p-5 border-t border-border">
+        <div className="flex items-center gap-2">
+          <input
+            ref={fileInputRef}
+            type="file"
+            multiple
+            onChange={handleFileSelect}
+            className="hidden"
+            aria-hidden="true"
+          />
+          <input
+            ref={imageInputRef}
+            type="file"
+            accept="image/*"
+            multiple
+            onChange={handleFileSelect}
+            className="hidden"
+            aria-hidden="true"
+          />
+          <div className="flex items-center gap-1.5">
+            <button
+              type="button"
+              className="h-10 w-10 rounded-full border border-border bg-background hover:bg-muted/50 text-muted-foreground hover:text-foreground transition-colors"
+              aria-label="Attach file"
+              onClick={() => fileInputRef.current?.click()}
+            >
+              <Paperclip className="h-4 w-4 mx-auto" aria-hidden="true" />
+            </button>
+            <button
+              type="button"
+              className="h-10 w-10 rounded-full border border-border bg-background hover:bg-muted/50 text-muted-foreground hover:text-foreground transition-colors"
+              aria-label="Attach image"
+              onClick={() => imageInputRef.current?.click()}
+            >
+              <ImageIcon className="h-4 w-4 mx-auto" aria-hidden="true" />
+            </button>
+          </div>
           <Input
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder="Ask a question..."
             disabled={localLoading || isLoading}
-            className="rounded-2xl h-10 bg-background border-border"
+            className="rounded-full h-11 bg-background border-border"
           />
           <Button
             type="submit"
             disabled={!input.trim() || localLoading || isLoading}
             size="sm"
-            className="rounded-2xl h-10 w-10 p-0"
+            className="rounded-full h-11 w-11 p-0 bg-primary hover:bg-primary/90 shadow-[0_10px_20px_rgba(66,133,244,0.35)]"
           >
             {localLoading || isLoading ? (
               <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />

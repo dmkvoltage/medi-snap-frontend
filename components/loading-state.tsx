@@ -6,8 +6,18 @@ import { Card } from '@/components/ui/card';
 export function LoadingState() {
   return (
     <div className="space-y-4">
-      <Card className="p-8 sm:p-12 flex flex-col items-center justify-center gap-6 min-h-80 sm:min-h-96 rounded-3xl border-border">
-        <div className="rounded-2xl bg-gradient-to-br from-primary/20 to-accent/20 p-4 sm:p-5">
+      <Card className="p-8 sm:p-12 flex flex-col items-center justify-center gap-6 min-h-80 sm:min-h-96 rounded-3xl border-border bg-background shadow-[0_6px_24px_rgba(0,0,0,0.06)]">
+        <div className="flex items-center gap-3 rounded-full border border-border/70 bg-muted/40 px-4 py-2">
+          <div className="flex items-center gap-1.5">
+            <span className="h-2 w-2 rounded-full bg-primary animate-bounce" style={{ animationDelay: '0ms' }} />
+            <span className="h-2 w-2 rounded-full bg-destructive animate-bounce" style={{ animationDelay: '120ms' }} />
+            <span className="h-2 w-2 rounded-full bg-accent animate-bounce" style={{ animationDelay: '240ms' }} />
+            <span className="h-2 w-2 rounded-full bg-secondary animate-bounce" style={{ animationDelay: '360ms' }} />
+          </div>
+          <span className="text-xs sm:text-sm font-medium text-muted-foreground">Analyzing…</span>
+        </div>
+
+        <div className="rounded-2xl bg-primary/10 p-4 sm:p-5">
           <Loader2 className="h-8 sm:h-10 w-8 sm:w-10 animate-spin text-primary" aria-hidden="true" />
         </div>
 
@@ -16,7 +26,7 @@ export function LoadingState() {
             Analyzing Your Document
           </h3>
           <p className="text-sm sm:text-base text-muted-foreground max-w-sm">
-            Our AI is reviewing your medical document and preparing a plain language explanation...
+            Our AI is reviewing your medical document and preparing a plain language explanation.
           </p>
         </div>
 

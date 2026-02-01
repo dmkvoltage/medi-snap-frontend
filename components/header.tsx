@@ -1,6 +1,8 @@
 'use client';
 
-import { Globe } from 'lucide-react';
+import Link from 'next/link';
+import { Globe, Moon, Sun } from 'lucide-react';
+import { useTheme } from 'next-themes';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -40,6 +42,9 @@ const logoLetters = [
 ];
 
 export function Header({ language = 'en', onLanguageChange }: HeaderProps) {
+  const { resolvedTheme, setTheme } = useTheme();
+  const isDark = resolvedTheme === 'dark';
+
   return (
     <header className="
       sticky top-0 z-50
@@ -56,7 +61,7 @@ export function Header({ language = 'en', onLanguageChange }: HeaderProps) {
         {/* ── Wordmark Logo ──
             No icon badge. The colored wordmark IS the logo,
             exactly like Google colors its own name. */}
-        <div className="flex items-center">
+        <Link href="/" aria-label="MediSnap home" className="flex items-center">
           <span className="text-xl sm:text-2xl font-semibold tracking-[-0.02em] leading-none">
             {logoLetters.map((letter, i) => (
               <span key={i} className={letter.color}>
@@ -64,12 +69,35 @@ export function Header({ language = 'en', onLanguageChange }: HeaderProps) {
               </span>
             ))}
           </span>
-        </div>
+        </Link>
 
         {/* ── Language Selector ──
             Google ghost button: no bg at rest, muted text,
             hover adds a subtle muted fill. Pill shaped. */}
-        <DropdownMenu>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setTheme(isDark ? 'light' : 'dark')}
+            aria-label={isDark ? 'Switch to light theme' : 'Switch to dark theme'}
+            className="
+              inline-flex items-center justify-center
+              h-9 w-9
+              rounded-full
+              text-muted-foreground
+              bg-transparent
+              hover:bg-muted/50
+              transition-colors duration-150
+              focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2
+            "
+          >
+            {isDark ? (
+              <Sun className="h-4 w-4" aria-hidden="true" />
+            ) : (
+              <Moon className="h-4 w-4" aria-hidden="true" />
+            )}
+          </button>
+
+          <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <button className="
               inline-flex items-center justify-center gap-2
@@ -114,7 +142,8 @@ export function Header({ language = 'en', onLanguageChange }: HeaderProps) {
               </DropdownMenuItem>
             ))}
           </DropdownMenuContent>
-        </DropdownMenu>
+          </DropdownMenu>
+        </div>
 
       </div>
     </header>
