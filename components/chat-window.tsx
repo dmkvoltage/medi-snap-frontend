@@ -5,6 +5,8 @@ import { Send, Loader2, MessageCircle, Paperclip, Image as ImageIcon } from 'luc
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import ReactMarkdown from 'react-markdown';
+import { getChatHistory } from '@/lib/api-client';
 
 interface Message {
   id: string;
@@ -13,14 +15,16 @@ interface Message {
 }
 
 interface ChatWindowProps {
-  onSendQuestion: (question: string) => void;
+  onSendQuestion: (question: string) => Promise<string>;
   isLoading?: boolean;
   suggestedQuestions?: string[];
+  interpretationId?: string; // Add this to load chat history
 }
 
 export function ChatWindow({
   onSendQuestion,
   isLoading = false,
+  interpretationId,
   suggestedQuestions = [
     'What does this mean?',
     'What are the risks?',
@@ -30,9 +34,35 @@ export function ChatWindow({
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [localLoading, setLocalLoading] = useState(false);
+  const [historyLoading, setHistoryLoading] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
+
+  // Load chat history when component mounts or interpretationId changes
+  useEffect(() => {
+    if (interpretationId) {
+      const loadChatHistory = async () => {
+        setHistoryLoading(true);
+        try {
+          const { messages: historyMessages } = await getChatHistory(interpretationId);
+          const formattedMessages: Message[] = historyMessages.map((msg, index) => ({
+            id: msg.id || `history-${index}`,
+            role: msg.role === 'user' ? 'user' : 'assistant',
+            content: msg.content,
+          }));
+          setMessages(formattedMessages);
+        } catch (error) {
+          console.error('Failed to load chat history:', error);
+          // Don't show error to user, just start with empty chat
+        } finally {
+          setHistoryLoading(false);
+        }
+      };
+
+      loadChatHistory();
+    }
+  }, [interpretationId]);
 
   // Auto-scroll to bottom
   useEffect(() => {
@@ -56,20 +86,57 @@ export function ChatWindow({
       setInput('');
 
       try {
-        onSendQuestion(question);
+        const response = await onSendQuestion(question);
 
-        setTimeout(() => {
+        // Ensure we have a valid response
+        if (!response) {
+          console.error('[ChatWindow] Received null/undefined response');
+          const errorMessage: Message = {
+            id: (Date.now() + 1).toString(),
+            role: 'assistant',
+            content: 'Sorry, I received no response. Please try asking your question again.',
+          };
+          setMessages((prev) => [...prev, errorMessage]);
+          return;
+        }
+
+        // Handle different response types
+        let responseText = '';
+        if (typeof response === 'string') {
+          responseText = response;
+        } else if (response && typeof response === 'object' && 'answer' in response) {
+          responseText = String(response.answer || '');
+        } else if (response) {
+          responseText = String(response);
+        }
+
+        if (responseText && responseText.trim()) {
           const assistantMessage: Message = {
             id: (Date.now() + 1).toString(),
             role: 'assistant',
-            content:
-              'Based on the document analysis, I can help explain this. Please note I provide general medical information, not professional medical advice. Always consult your healthcare provider.',
+            content: responseText,
           };
           setMessages((prev) => [...prev, assistantMessage]);
-          setLocalLoading(false);
-        }, 800);
+        } else {
+          console.error('[ChatWindow] Empty response text, response was:', response);
+          // Add error message to chat
+          const errorMessage: Message = {
+            id: (Date.now() + 1).toString(),
+            role: 'assistant',
+            content: 'Sorry, I received an empty response. Please try asking your question again.',
+          };
+          setMessages((prev) => [...prev, errorMessage]);
+        }
       } catch (error) {
-        console.error('[v0] Error sending question:', error);
+        console.error('[ChatWindow] Error sending question:', error);
+        // Add error message to chat
+        const errorMessage: Message = {
+          id: (Date.now() + 1).toString(),
+          role: 'assistant',
+          content: 'Sorry, I encountered an error. Please try again.',
+        };
+        setMessages((prev) => [...prev, errorMessage]);
+      } finally {
         setLocalLoading(false);
       }
     },
@@ -130,7 +197,18 @@ export function ChatWindow({
         className="h-64 sm:h-80 px-4 sm:px-5 py-4 space-y-3"
       >
         <div className="space-y-3">
-          {messages.length === 0 && (
+          {historyLoading && (
+            <div className="flex flex-col items-center justify-center h-full text-center">
+              <div className="rounded-2xl bg-primary/10 p-3 mb-3">
+                <Loader2 className="h-6 w-6 text-primary animate-spin" aria-hidden="true" />
+              </div>
+              <p className="text-sm text-muted-foreground">
+                Loading chat history...
+              </p>
+            </div>
+          )}
+
+          {!historyLoading && messages.length === 0 && (
             <div className="flex flex-col items-center justify-center h-full text-center">
               <div className="rounded-2xl bg-primary/10 p-3 mb-3">
                 <MessageCircle className="h-6 w-6 text-primary" aria-hidden="true" />
@@ -141,7 +219,7 @@ export function ChatWindow({
             </div>
           )}
 
-          {messages.map((message) => (
+          {!historyLoading && messages.map((message) => (
             <div
               key={message.id}
               className={`flex gap-3 animate-in fade-in ${
@@ -155,7 +233,23 @@ export function ChatWindow({
                     : 'bg-muted/40 border border-border text-foreground rounded-bl-none'
                 }`}
               >
-                {message.content}
+                {message.role === 'assistant' ? (
+                  <ReactMarkdown 
+                    className="prose prose-sm max-w-none dark:prose-invert"
+                    components={{
+                      p: ({ children }) => <p className="mb-2 last:mb-0">{children}</p>,
+                      ul: ({ children }) => <ul className="mb-2 last:mb-0 list-disc list-inside">{children}</ul>,
+                      ol: ({ children }) => <ol className="mb-2 last:mb-0 list-decimal list-inside">{children}</ol>,
+                      li: ({ children }) => <li className="mb-1">{children}</li>,
+                      strong: ({ children }) => <strong className="font-semibold">{children}</strong>,
+                      em: ({ children }) => <em className="italic">{children}</em>,
+                    }}
+                  >
+                    {message.content}
+                  </ReactMarkdown>
+                ) : (
+                  message.content
+                )}
               </div>
             </div>
           ))}
@@ -171,7 +265,7 @@ export function ChatWindow({
       </ScrollArea>
 
       {/* Suggested Questions */}
-      {messages.length === 0 && (
+      {!historyLoading && messages.length === 0 && (
         <div className="px-4 sm:px-5 pb-3 space-y-2">
           <p className="text-xs text-muted-foreground font-medium">Quick Questions</p>
           <div className="flex flex-wrap gap-2">

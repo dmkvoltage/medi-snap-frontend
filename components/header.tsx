@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { Globe, Moon, Sun } from 'lucide-react';
+import { Globe, Moon, Sun, User as UserIcon } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import {
   DropdownMenu,
@@ -10,6 +10,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { Button } from '@/components/ui/button';
+import { useAuth } from '@/lib/auth-context';
 
 interface HeaderProps {
   language?: string;
@@ -44,6 +46,7 @@ const logoLetters = [
 
 export function Header({ language = 'en', onLanguageChange }: HeaderProps) {
   const { resolvedTheme, setTheme } = useTheme();
+  const { user, isAuthenticated, logout } = useAuth();
   const isDark = resolvedTheme === 'dark';
   const [mounted, setMounted] = useState(false);
 
@@ -154,64 +157,71 @@ export function Header({ language = 'en', onLanguageChange }: HeaderProps) {
           </DropdownMenuContent>
           </DropdownMenu>
 
-          {/* Google-style account avatar + menu */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <button
-                type="button"
-                className="
-                  h-9 w-9 rounded-full
-                  border border-border/70
-                  bg-background
-                  text-foreground
-                  flex items-center justify-center
-                  text-xs font-semibold
-                  shadow-[0_1px_2px_rgba(0,0,0,0.08)]
-                  hover:shadow-[0_2px_6px_rgba(0,0,0,0.12)]
-                  transition-shadow duration-150
-                  focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2
-                "
-                aria-label="Google account"
-              >
-                <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-primary/10 text-primary">
-                  U
-                </span>
-              </button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent
-              align="end"
-              className="
-                w-64 rounded-2xl border border-border bg-card
-                shadow-[0_8px_24px_rgba(0,0,0,0.12)]
-                p-2
-              "
-            >
-              <div className="px-3 py-2">
-                <p className="text-xs text-muted-foreground">Signed in as</p>
-                <p className="text-sm font-medium text-foreground truncate">user@example.com</p>
-              </div>
-              <div className="px-3 pb-2">
+          {/* Account Menu */}
+          {isAuthenticated ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
                 <button
                   type="button"
                   className="
-                    w-full h-9 rounded-full
-                    border border-border bg-background
-                    text-xs font-medium text-foreground
-                    hover:bg-muted/40 transition-colors
+                    h-9 w-9 rounded-full
+                    border border-border/70
+                    bg-background
+                    text-foreground
+                    flex items-center justify-center
+                    text-xs font-semibold
+                    shadow-[0_1px_2px_rgba(0,0,0,0.08)]
+                    hover:shadow-[0_2px_6px_rgba(0,0,0,0.12)]
+                    transition-shadow duration-150
+                    focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2
                   "
+                  aria-label="Account"
                 >
-                  Manage your Google Account
+                  <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-primary/10 text-primary">
+                    {user?.full_name ? user.full_name[0].toUpperCase() : user?.email[0].toUpperCase()}
+                  </span>
                 </button>
-              </div>
-              <div className="h-px bg-border my-2" />
-              <DropdownMenuItem className="rounded-lg cursor-pointer">
-                Switch account
-              </DropdownMenuItem>
-              <DropdownMenuItem className="rounded-lg cursor-pointer">
-                Sign out
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent
+                align="end"
+                className="
+                  w-64 rounded-2xl border border-border bg-card
+                  shadow-[0_8px_24px_rgba(0,0,0,0.12)]
+                  p-2
+                "
+              >
+                <div className="px-3 py-2">
+                  <p className="text-xs text-muted-foreground">Signed in as</p>
+                  <p className="text-sm font-medium text-foreground truncate">{user?.email}</p>
+                </div>
+                <div className="px-3 pb-2">
+                  <Link href="/dashboard" className="w-full">
+                    <button
+                      type="button"
+                      className="
+                        w-full h-9 rounded-full
+                        border border-border bg-background
+                        text-xs font-medium text-foreground
+                        hover:bg-muted/40 transition-colors
+                      "
+                    >
+                      Dashboard
+                    </button>
+                  </Link>
+                </div>
+                <div className="h-px bg-border my-2" />
+                <DropdownMenuItem onClick={logout} className="rounded-lg cursor-pointer text-destructive focus:text-destructive">
+                  Sign out
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+            <Link href="/login">
+              <Button variant="ghost" size="sm" className="rounded-full">
+                Sign In
+              </Button>
+            </Link>
+          )}
         </div>
 
       </div>

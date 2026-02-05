@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import {
   Copy,
   Download,
@@ -12,6 +12,7 @@ import {
   Plus,
   BookOpen,
   RotateCcw,
+  MessageCircle,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -27,8 +28,9 @@ import { ChatWindow } from '@/components/chat-window';
 interface ResultsDisplayProps {
   results: InterpretationResponse;
   onNewDocument?: () => void;
-  onAsking?: (question: string) => void;
+  onAsking?: (question: string) => Promise<string>;
   isAsking?: boolean;
+  defaultTab?: string;
 }
 
 export function ResultsDisplay({
@@ -36,12 +38,12 @@ export function ResultsDisplay({
   onNewDocument,
   onAsking,
   isAsking = false,
+  defaultTab = 'summary',
 }: ResultsDisplayProps) {
   const [copiedTab, setCopiedTab] = useState<string | null>(null);
   const [expandedSections, setExpandedSections] = useState<
     Record<number, boolean>
   >({});
-  const [showChat, setShowChat] = useState(false);
 
   const handleCopy = (text: string, tab: string) => {
     navigator.clipboard.writeText(text);
@@ -237,28 +239,52 @@ export function ResultsDisplay({
   // Actions tab content
   const ActionsTab = () => (
     <div className="space-y-4">
+      {results.interpretation.warnings && results.interpretation.warnings.length > 0 && (
+        <Card className="p-4 sm:p-6 rounded-2xl border-red-200 bg-red-50 dark:bg-red-950/30 dark:border-red-900">
+          <h3 className="font-semibold text-red-900 dark:text-red-200 mb-3 flex items-center gap-2">
+            <AlertCircle className="h-5 w-5 flex-shrink-0" aria-hidden="true" />
+            <span>Important Warnings</span>
+          </h3>
+          <ul className="space-y-2 text-sm text-red-800 dark:text-red-300">
+            {results.interpretation.warnings.map((warning, i) => (
+              <li key={i} className="flex gap-2">
+                <span>•</span>
+                <span>{warning}</span>
+              </li>
+            ))}
+          </ul>
+        </Card>
+      )}
+
       <Card className="p-4 sm:p-6 rounded-2xl border-border bg-gradient-to-br from-primary/5 to-accent/5">
         <h3 className="font-semibold text-foreground mb-4 flex items-center gap-2">
           <AlertCircle className="h-5 w-5 text-primary flex-shrink-0" aria-hidden="true" />
           <span>Next Steps</span>
         </h3>
         <ol className="space-y-3 text-sm text-foreground">
-          <li className="flex gap-3">
-            <span className="font-bold text-primary flex-shrink-0 w-6">1.</span>
-            <span>Review the plain language summary above</span>
-          </li>
-          <li className="flex gap-3">
-            <span className="font-bold text-primary flex-shrink-0 w-6">2.</span>
-            <span>Ask questions in the chat for clarification</span>
-          </li>
-          <li className="flex gap-3">
-            <span className="font-bold text-primary flex-shrink-0 w-6">3.</span>
-            <span>Share with your healthcare provider</span>
-          </li>
-          <li className="flex gap-3">
-            <span className="font-bold text-primary flex-shrink-0 w-6">4.</span>
-            <span>Download for your records</span>
-          </li>
+          {results.interpretation.nextSteps && results.interpretation.nextSteps.length > 0 ? (
+            results.interpretation.nextSteps.map((step, i) => (
+              <li key={i} className="flex gap-3">
+                <span className="font-bold text-primary flex-shrink-0 w-6">{i + 1}.</span>
+                <span>{step}</span>
+              </li>
+            ))
+          ) : (
+            <>
+              <li className="flex gap-3">
+                <span className="font-bold text-primary flex-shrink-0 w-6">1.</span>
+                <span>Review the plain language summary above</span>
+              </li>
+              <li className="flex gap-3">
+                <span className="font-bold text-primary flex-shrink-0 w-6">2.</span>
+                <span>Use the Chat tab to ask questions for clarification</span>
+              </li>
+              <li className="flex gap-3">
+                <span className="font-bold text-primary flex-shrink-0 w-6">3.</span>
+                <span>Share with your healthcare provider</span>
+              </li>
+            </>
+          )}
         </ol>
       </Card>
 
@@ -273,30 +299,62 @@ export function ResultsDisplay({
       </Card>
 
       {onAsking && (
-        <Card className="p-4 sm:p-6 rounded-2xl border-border">
-          <h3 className="font-semibold text-foreground mb-3">Questions?</h3>
-          <p className="text-sm text-muted-foreground mb-4">
-            Ask follow-up questions about this document for clarification
+        <Card className="p-4 sm:p-6 rounded-2xl border-border bg-blue-50 dark:bg-blue-950/30 border-blue-200 dark:border-blue-900">
+          <h3 className="font-semibold text-blue-900 dark:text-blue-200 mb-3 flex items-center gap-2">
+            <MessageCircle className="h-5 w-5 flex-shrink-0" aria-hidden="true" />
+            <span>Have Questions?</span>
+          </h3>
+          <p className="text-sm text-blue-800 dark:text-blue-300 leading-relaxed mb-3">
+            Switch to the Chat tab to ask follow-up questions about your medical document in plain language.
           </p>
-          <Button
-            onClick={() => setShowChat(!showChat)}
-            className="w-full rounded-2xl h-10 bg-primary hover:bg-primary/90"
-          >
-            {showChat ? 'Hide Chat' : 'Ask a Question'}
-          </Button>
-
-          {showChat && (
-            <div className="mt-4">
-              <ChatWindow
-                onSendQuestion={onAsking}
-                isLoading={isAsking}
-              />
-            </div>
-          )}
+          <div className="text-xs text-blue-700 dark:text-blue-400">
+            💡 Try asking: "What should I discuss with my doctor?" or "Are there any concerns?"
+          </div>
         </Card>
       )}
+
     </div>
   );
+
+  // Chat tab content
+  const ChatTab = useCallback(() => (
+    <div className="space-y-4">
+      {onAsking ? (
+        <>
+          <div className="text-center space-y-2 mb-6">
+            <h3 className="font-semibold text-foreground">Ask Questions</h3>
+            <p className="text-sm text-muted-foreground">
+              Get clarifications about your medical document in plain language
+            </p>
+          </div>
+          <ChatWindow
+            key="chat-window" // Add stable key
+            onSendQuestion={onAsking}
+            isLoading={isAsking}
+            interpretationId={results.id} // Pass the interpretation ID
+            suggestedQuestions={[
+              "What do these results mean for my health?",
+              "Are there any values I should be concerned about?",
+              "What should I discuss with my doctor?",
+              "What are the next steps I should take?",
+              "Can you explain the medical terms in simpler language?",
+              "Are there any lifestyle changes I should consider?"
+            ]}
+          />
+        </>
+      ) : (
+        <div className="text-center py-8">
+          <div className="rounded-2xl bg-muted/50 p-6 max-w-sm mx-auto">
+            <MessageCircle className="h-8 w-8 text-muted-foreground mx-auto mb-3" />
+            <h3 className="font-medium text-foreground mb-2">Chat Not Available</h3>
+            <p className="text-sm text-muted-foreground">
+              Chat functionality is not available for this session.
+            </p>
+          </div>
+        </div>
+      )}
+    </div>
+  ), [onAsking, isAsking]);
 
   return (
     <div className="space-y-4 sm:space-y-6">
@@ -323,10 +381,10 @@ export function ResultsDisplay({
       </div>
 
       {/* Cohesive Results Card */}
-      <Tabs defaultValue="summary" className="w-full">
+      <Tabs defaultValue={defaultTab} className="w-full">
         <Card className="rounded-2xl border-border overflow-hidden">
           {/* Tab List */}
-          <TabsList className="w-full grid grid-cols-4 rounded-none border-b border-border bg-transparent p-0 h-auto">
+          <TabsList className="w-full grid grid-cols-5 rounded-none border-b border-border bg-transparent p-0 h-auto">
             <TabsTrigger
               value="summary"
               className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-muted/50 px-2 py-4 text-xs sm:text-sm font-medium transition-colors"
@@ -355,6 +413,13 @@ export function ResultsDisplay({
               <span className="hidden sm:inline">Actions</span>
               <span className="sm:hidden">Help</span>
             </TabsTrigger>
+            <TabsTrigger
+              value="chat"
+              className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-muted/50 px-2 py-4 text-xs sm:text-sm font-medium transition-colors"
+            >
+              <span className="hidden sm:inline">Chat</span>
+              <span className="sm:hidden">Q&A</span>
+            </TabsTrigger>
           </TabsList>
 
           {/* Tab Content */}
@@ -370,6 +435,9 @@ export function ResultsDisplay({
             </TabsContent>
             <TabsContent value="actions" className="mt-0">
               <ActionsTab />
+            </TabsContent>
+            <TabsContent value="chat" className="mt-0">
+              <ChatTab />
             </TabsContent>
           </div>
         </Card>

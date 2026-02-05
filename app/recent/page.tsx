@@ -1,81 +1,73 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { PageShell } from '@/components/page-shell';
 import { ResultsDisplay } from '@/components/results-display';
 import { LoadingState } from '@/components/loading-state';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { AlertCircle, ArrowLeft, FileText, MessageCircle, Download } from 'lucide-react';
-import { getInterpretation, askQuestion, InterpretationResponse } from '@/lib/api-client';
+import { AlertCircle, ArrowLeft, FileText, Upload } from 'lucide-react';
+import { getInterpretations, askQuestion, InterpretationResponse } from '@/lib/api-client';
 import { useAuth } from '@/lib/auth-context';
 
-export default function ResultsPage() {
+export default function RecentResultsPage() {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const { isAuthenticated } = useAuth();
-  const interpretationId = searchParams.get('id');
+  const { isAuthenticated, isLoading: authLoading } = useAuth();
 
   const [results, setResults] = useState<InterpretationResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [asking, setAsking] = useState(false);
   const [language, setLanguage] = useState('en');
-  const [defaultTab, setDefaultTab] = useState('summary');
 
   useEffect(() => {
-    // Check URL hash for default tab
-    if (typeof window !== 'undefined' && window.location.hash === '#chat') {
-      setDefaultTab('chat');
+    if (!authLoading && !isAuthenticated) {
+      router.push('/login?message=Please sign in to view your results');
     }
-  }, []);
+  }, [authLoading, isAuthenticated, router]);
 
   useEffect(() => {
-    if (!interpretationId) {
-      setError('No interpretation ID provided');
-      setLoading(false);
-      return;
+    if (isAuthenticated) {
+      const fetchMostRecent = async () => {
+        try {
+          setLoading(true);
+          // Get the most recent interpretation (page 1, limit 1)
+          const response = await getInterpretations({ page: 1, limit: 1 });
+          if (response.data && response.data.length > 0) {
+            setResults(response.data[0]);
+          } else {
+            setError('No recent analyses found. Upload a document to get started.');
+          }
+        } catch (err) {
+          console.error('Failed to fetch recent results:', err);
+          setError('Failed to load recent results');
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      fetchMostRecent();
     }
-
-    const fetchResults = async () => {
-      try {
-        setLoading(true);
-        const data = await getInterpretation(interpretationId);
-        setResults(data);
-      } catch (err) {
-        console.error('Failed to fetch results:', err);
-        setError(err instanceof Error ? err.message : 'Failed to load results');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchResults();
-  }, [interpretationId]);
+  }, [isAuthenticated]);
 
   const handleAskQuestion = useCallback(
     async (question: string) => {
       if (!results) {
         console.error('No results available for chat');
-        return 'No results available for chat';
+        return;
       }
 
+      console.log('Asking question:', question, 'for interpretation:', results.id);
       setAsking(true);
       try {
         const response = await askQuestion(results.id, question, language);
-        
-        // Ensure we return a string
-        if (response && response.answer && typeof response.answer === 'string') {
-          return response.answer;
-        } else {
-          console.error('Invalid response format:', response);
-          return 'Sorry, I received an invalid response. Please try asking your question again.';
-        }
+        console.log('Chat response:', response);
+        return response.answer;
       } catch (err) {
         console.error('Q&A Error:', err);
-        return 'Sorry, I encountered an error. Please try again.';
+        throw err;
       } finally {
         setAsking(false);
       }
@@ -87,11 +79,11 @@ export default function ResultsPage() {
     router.push('/upload');
   }, [router]);
 
-  if (loading) {
+  if (authLoading || loading) {
     return (
       <PageShell
-        title="Loading Results"
-        description="Retrieving your interpretation..."
+        title="Loading Recent Results"
+        description="Retrieving your most recent analysis..."
         language={language}
         onLanguageChange={setLanguage}
       >
@@ -103,8 +95,8 @@ export default function ResultsPage() {
   if (error || !results) {
     return (
       <PageShell
-        title="Results Not Found"
-        description="Unable to load the interpretation results"
+        title="Recent Results"
+        description="Your most recent document analysis"
         language={language}
         onLanguageChange={setLanguage}
       >
@@ -112,7 +104,7 @@ export default function ResultsPage() {
           <Alert variant="destructive">
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>
-              {error || 'The requested interpretation could not be found.'}
+              {error || 'No recent results found.'}
             </AlertDescription>
           </Alert>
 
@@ -122,14 +114,12 @@ export default function ResultsPage() {
             </CardHeader>
             <CardContent className="space-y-3">
               <Button onClick={() => router.push('/upload')} className="w-full">
-                <FileText className="mr-2 h-4 w-4" />
+                <Upload className="mr-2 h-4 w-4" />
                 Upload a New Document
               </Button>
-              {isAuthenticated && (
-                <Button variant="outline" onClick={() => router.push('/dashboard')} className="w-full">
-                  View Your History
-                </Button>
-              )}
+              <Button variant="outline" onClick={() => router.push('/dashboard')} className="w-full">
+                View All History
+              </Button>
               <Button variant="outline" onClick={() => router.push('/')} className="w-full">
                 <ArrowLeft className="mr-2 h-4 w-4" />
                 Back to Home
@@ -143,8 +133,8 @@ export default function ResultsPage() {
 
   return (
     <PageShell
-      title={`Results: ${results.document_type}`}
-      description={`Interpretation completed with ${Math.round(results.confidence * 100)}% confidence`}
+      title="Recent Results"
+      description={`Your most recent analysis: ${results.document_type} (${Math.round(results.confidence * 100)}% confidence)`}
       language={language}
       onLanguageChange={setLanguage}
     >
@@ -155,7 +145,6 @@ export default function ResultsPage() {
           onNewDocument={handleNewDocument}
           onAsking={handleAskQuestion}
           isAsking={asking}
-          defaultTab={defaultTab}
         />
 
         {/* Action Cards */}
@@ -163,7 +152,7 @@ export default function ResultsPage() {
           <Card>
             <CardContent className="pt-6">
               <div className="text-center space-y-2">
-                <FileText className="h-8 w-8 text-primary mx-auto" />
+                <Upload className="h-8 w-8 text-primary mx-auto" />
                 <h3 className="font-medium">Upload Another</h3>
                 <p className="text-sm text-muted-foreground">
                   Analyze a new medical document
@@ -178,13 +167,13 @@ export default function ResultsPage() {
           <Card>
             <CardContent className="pt-6">
               <div className="text-center space-y-2">
-                <MessageCircle className="h-8 w-8 text-primary mx-auto" />
-                <h3 className="font-medium">Ask Questions</h3>
+                <FileText className="h-8 w-8 text-primary mx-auto" />
+                <h3 className="font-medium">View History</h3>
                 <p className="text-sm text-muted-foreground">
-                  Get clarifications via chat
+                  See all your past analyses
                 </p>
-                <Button variant="outline" size="sm" className="w-full" disabled>
-                  Available in Actions Tab
+                <Button variant="outline" size="sm" className="w-full" onClick={() => router.push('/dashboard')}>
+                  View All Results
                 </Button>
               </div>
             </CardContent>
@@ -193,41 +182,17 @@ export default function ResultsPage() {
           <Card>
             <CardContent className="pt-6">
               <div className="text-center space-y-2">
-                <Download className="h-8 w-8 text-primary mx-auto" />
-                <h3 className="font-medium">Save Results</h3>
+                <ArrowLeft className="h-8 w-8 text-primary mx-auto" />
+                <h3 className="font-medium">Back to Home</h3>
                 <p className="text-sm text-muted-foreground">
-                  Download as PDF or text
+                  Return to the main page
                 </p>
-                {isAuthenticated ? (
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    className="w-full"
-                    onClick={() => router.push(`/interpret/${results.id}`)}
-                  >
-                    View in Dashboard
-                  </Button>
-                ) : (
-                  <Button variant="outline" size="sm" className="w-full" disabled>
-                    Login to Save
-                  </Button>
-                )}
+                <Button variant="outline" size="sm" className="w-full" onClick={() => router.push('/')}>
+                  Home
+                </Button>
               </div>
             </CardContent>
           </Card>
-        </div>
-
-        {/* Navigation */}
-        <div className="flex justify-between">
-          <Button variant="outline" onClick={() => router.push('/')}>
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Home
-          </Button>
-          {isAuthenticated && (
-            <Button variant="outline" onClick={() => router.push('/dashboard')}>
-              View All Results
-            </Button>
-          )}
         </div>
       </div>
     </PageShell>

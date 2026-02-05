@@ -288,6 +288,7 @@ export function DocumentUpload({
         {/* Preview image */}
         <div className="px-5 pb-5">
           <div className="rounded-xl bg-muted border border-border overflow-hidden aspect-[4/3] flex items-center justify-center">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={preview}
               alt="Document preview"
