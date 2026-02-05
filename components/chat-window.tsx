@@ -43,25 +43,30 @@ export function ChatWindow({
   const imageInputRef = useRef<HTMLInputElement>(null);
   const lastInterpretationId = useRef<string | undefined>();
 
-  // Load chat history only once when component mounts or interpretationId changes
+  // Load chat history when component mounts or interpretationId changes
   useEffect(() => {
-    if (interpretationId && interpretationId !== lastInterpretationId.current && !historyLoaded) {
+    if (interpretationId && interpretationId !== lastInterpretationId.current) {
       lastInterpretationId.current = interpretationId;
+      setHistoryLoaded(false); // Reset history loaded state for new interpretation
       
       const loadChatHistory = async () => {
+        console.log('[ChatWindow] Loading chat history for:', interpretationId);
         setHistoryLoading(true);
         try {
           const { messages: historyMessages } = await getChatHistory(interpretationId);
+          console.log('[ChatWindow] Chat history loaded:', historyMessages);
           const formattedMessages: Message[] = historyMessages.map((msg, index) => ({
             id: msg.id || `history-${index}`,
             role: msg.role === 'user' ? 'user' : 'assistant',
             content: msg.content,
           }));
+          console.log('[ChatWindow] Formatted messages:', formattedMessages);
           setMessages(formattedMessages);
           setHistoryLoaded(true);
         } catch (error) {
-          console.error('Failed to load chat history:', error);
+          console.error('[ChatWindow] Failed to load chat history:', error);
           // Don't show error to user, just start with empty chat
+          setMessages([]); // Ensure we start with empty messages on error
           setHistoryLoaded(true); // Mark as loaded even on error to prevent retry loops
         } finally {
           setHistoryLoading(false);
@@ -70,7 +75,7 @@ export function ChatWindow({
 
       loadChatHistory();
     }
-  }, [interpretationId, historyLoaded]);
+  }, [interpretationId]); // Remove historyLoaded from dependencies
 
   // Auto-scroll to bottom only when new messages are added (not when scrolling up)
   const lastMessageCount = useRef(0);

@@ -146,6 +146,8 @@ export async function getChatHistory(
   interpretationId: string,
   signal?: AbortSignal
 ): Promise<{ messages: Array<{ id: string; role: string; content: string; created_at: string }> }> {
+  console.log('[API] getChatHistory called for:', interpretationId);
+  
   try {
     const response = await fetch(`${API_BASE_URL}/chat/${interpretationId}`, {
       method: 'GET',
@@ -153,15 +155,22 @@ export async function getChatHistory(
       signal,
     });
 
+    console.log('[API] Chat history response status:', response.status);
+    console.log('[API] Chat history response ok:', response.ok);
+
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
+      console.error('[API] Chat history error response:', errorData);
       throw new Error(errorData.error || `HTTP ${response.status}: ${response.statusText}`);
     }
 
     const data = await response.json();
+    console.log('[API] Chat history data:', data);
+    console.log('[API] Chat history messages count:', data.messages?.length || 0);
+    
     return data as { messages: Array<{ id: string; role: string; content: string; created_at: string }> };
   } catch (error) {
-    console.error('API: Chat history request failed:', error);
+    console.error('[API] Chat history request failed:', error);
     if (error instanceof Error) {
       throw new Error(`Failed to fetch chat history: ${error.message}`);
     }

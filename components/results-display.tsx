@@ -319,44 +319,47 @@ export function ResultsDisplay({
   );
 
   // Chat tab content - memoized to prevent re-mounting
-  const chatTabContent = useMemo(() => (
-    <div className="space-y-4">
-      {onAsking ? (
-        <>
-          <div className="text-center space-y-2 mb-6">
-            <h3 className="font-semibold text-foreground">Ask Questions</h3>
-            <p className="text-sm text-muted-foreground">
-              Get clarifications about your medical document in plain language
-            </p>
+  const chatTabContent = useMemo(() => {
+    console.log('[ResultsDisplay] Creating chat tab content, onAsking:', !!onAsking, 'isAsking:', isAsking);
+    return (
+      <div className="space-y-4">
+        {onAsking ? (
+          <>
+            <div className="text-center space-y-2 mb-6">
+              <h3 className="font-semibold text-foreground">Ask Questions</h3>
+              <p className="text-sm text-muted-foreground">
+                Get clarifications about your medical document in plain language
+              </p>
+            </div>
+            <ChatWindow
+              key={`chat-${results.id}`} // Stable key based on interpretation ID
+              onSendQuestion={onAsking}
+              isLoading={isAsking}
+              interpretationId={results.id}
+              suggestedQuestions={[
+                "What do these results mean for my health?",
+                "Are there any values I should be concerned about?",
+                "What should I discuss with my doctor?",
+                "What are the next steps I should take?",
+                "Can you explain the medical terms in simpler language?",
+                "Are there any lifestyle changes I should consider?"
+              ]}
+            />
+          </>
+        ) : (
+          <div className="text-center py-8">
+            <div className="rounded-2xl bg-muted/50 p-6 max-w-sm mx-auto">
+              <MessageCircle className="h-8 w-8 text-muted-foreground mx-auto mb-3" />
+              <h3 className="font-medium text-foreground mb-2">Chat Not Available</h3>
+              <p className="text-sm text-muted-foreground">
+                Chat functionality is not available for this session.
+              </p>
+            </div>
           </div>
-          <ChatWindow
-            key={`chat-${results.id}`} // Stable key based on interpretation ID
-            onSendQuestion={onAsking}
-            isLoading={isAsking}
-            interpretationId={results.id}
-            suggestedQuestions={[
-              "What do these results mean for my health?",
-              "Are there any values I should be concerned about?",
-              "What should I discuss with my doctor?",
-              "What are the next steps I should take?",
-              "Can you explain the medical terms in simpler language?",
-              "Are there any lifestyle changes I should consider?"
-            ]}
-          />
-        </>
-      ) : (
-        <div className="text-center py-8">
-          <div className="rounded-2xl bg-muted/50 p-6 max-w-sm mx-auto">
-            <MessageCircle className="h-8 w-8 text-muted-foreground mx-auto mb-3" />
-            <h3 className="font-medium text-foreground mb-2">Chat Not Available</h3>
-            <p className="text-sm text-muted-foreground">
-              Chat functionality is not available for this session.
-            </p>
-          </div>
-        </div>
-      )}
-    </div>
-  ), [onAsking, isAsking, results.id]);
+        )}
+      </div>
+    );
+  }, [onAsking, results.id]); // Remove isAsking from dependencies to prevent re-mounting
 
   return (
     <div className="space-y-4 sm:space-y-6">
