@@ -95,30 +95,43 @@ export async function askQuestion(
   language: string = 'en',
   signal?: AbortSignal
 ): Promise<{ answer: string }> {
+  console.log('[API] askQuestion called with:', { questionId, question, language });
+  
   try {
+    const requestBody = {
+      session_id: questionId,
+      question,
+      language,
+    };
+    console.log('[API] Request body:', requestBody);
+    
     const response = await fetch(`${API_BASE_URL}/chat/`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         ...getHeaders(),
       },
-      body: JSON.stringify({
-        session_id: questionId,
-        question,
-        language,
-      }),
+      body: JSON.stringify(requestBody),
       signal,
     });
 
+    console.log('[API] Response status:', response.status);
+    console.log('[API] Response ok:', response.ok);
+
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
+      console.error('[API] Error response:', errorData);
       throw new Error(errorData.error || `HTTP ${response.status}: ${response.statusText}`);
     }
 
     const data = await response.json();
+    console.log('[API] Response data:', data);
+    console.log('[API] Data type:', typeof data);
+    console.log('[API] Data keys:', Object.keys(data));
+    
     return data as { answer: string };
   } catch (error) {
-    console.error('API: Chat request failed:', error);
+    console.error('[API] Chat request failed:', error);
     if (error instanceof Error) {
       throw new Error(`Failed to ask question: ${error.message}`);
     }

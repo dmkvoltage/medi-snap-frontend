@@ -31,17 +31,23 @@ export function ChatWindow({
     'What next?',
   ],
 }: ChatWindowProps) {
+  console.log('[ChatWindow] Component rendered/re-rendered for interpretation:', interpretationId);
+  
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [localLoading, setLocalLoading] = useState(false);
   const [historyLoading, setHistoryLoading] = useState(false);
+  const [historyLoaded, setHistoryLoaded] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
+  const lastInterpretationId = useRef<string | undefined>();
 
-  // Load chat history when component mounts or interpretationId changes
+  // Load chat history only once when component mounts or interpretationId changes
   useEffect(() => {
-    if (interpretationId) {
+    if (interpretationId && interpretationId !== lastInterpretationId.current && !historyLoaded) {
+      lastInterpretationId.current = interpretationId;
+      
       const loadChatHistory = async () => {
         setHistoryLoading(true);
         try {
@@ -52,9 +58,11 @@ export function ChatWindow({
             content: msg.content,
           }));
           setMessages(formattedMessages);
+          setHistoryLoaded(true);
         } catch (error) {
           console.error('Failed to load chat history:', error);
           // Don't show error to user, just start with empty chat
+          setHistoryLoaded(true); // Mark as loaded even on error to prevent retry loops
         } finally {
           setHistoryLoading(false);
         }
@@ -62,19 +70,28 @@ export function ChatWindow({
 
       loadChatHistory();
     }
-  }, [interpretationId]);
+  }, [interpretationId, historyLoaded]);
 
-  // Auto-scroll to bottom
+  // Auto-scroll to bottom only when new messages are added (not when scrolling up)
+  const lastMessageCount = useRef(0);
   useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    if (scrollRef.current && messages.length > lastMessageCount.current) {
+      // Only auto-scroll if we're near the bottom (within 100px) or if it's the first load
+      const scrollElement = scrollRef.current;
+      const isNearBottom = scrollElement.scrollTop + scrollElement.clientHeight >= scrollElement.scrollHeight - 100;
+      
+      if (isNearBottom || lastMessageCount.current === 0) {
+        scrollElement.scrollTop = scrollElement.scrollHeight;
+      }
     }
+    lastMessageCount.current = messages.length;
   }, [messages]);
 
   const handleSendQuestion = useCallback(
     async (question: string) => {
       if (!question.trim() || localLoading || isLoading) return;
 
+      console.log('[ChatWindow] Sending question:', question);
       setLocalLoading(true);
       const newMessage: Message = {
         id: Date.now().toString(),
@@ -86,7 +103,10 @@ export function ChatWindow({
       setInput('');
 
       try {
+        console.log('[ChatWindow] Calling onSendQuestion...');
         const response = await onSendQuestion(question);
+        console.log('[ChatWindow] Raw response received:', response);
+        console.log('[ChatWindow] Response type:', typeof response);
 
         // Ensure we have a valid response
         if (!response) {
@@ -104,11 +124,17 @@ export function ChatWindow({
         let responseText = '';
         if (typeof response === 'string') {
           responseText = response;
+          console.log('[ChatWindow] Response is string:', responseText);
         } else if (response && typeof response === 'object' && 'answer' in response) {
           responseText = String(response.answer || '');
+          console.log('[ChatWindow] Response has answer property:', responseText);
         } else if (response) {
           responseText = String(response);
+          console.log('[ChatWindow] Response converted to string:', responseText);
         }
+
+        console.log('[ChatWindow] Final response text:', responseText);
+        console.log('[ChatWindow] Response text length:', responseText.length);
 
         if (responseText && responseText.trim()) {
           const assistantMessage: Message = {
@@ -116,7 +142,12 @@ export function ChatWindow({
             role: 'assistant',
             content: responseText,
           };
-          setMessages((prev) => [...prev, assistantMessage]);
+          console.log('[ChatWindow] Adding assistant message:', assistantMessage);
+          setMessages((prev) => {
+            const newMessages = [...prev, assistantMessage];
+            console.log('[ChatWindow] New messages array:', newMessages);
+            return newMessages;
+          });
         } else {
           console.error('[ChatWindow] Empty response text, response was:', response);
           // Add error message to chat
@@ -234,19 +265,20 @@ export function ChatWindow({
                 }`}
               >
                 {message.role === 'assistant' ? (
-                  <ReactMarkdown 
-                    className="prose prose-sm max-w-none dark:prose-invert"
-                    components={{
-                      p: ({ children }) => <p className="mb-2 last:mb-0">{children}</p>,
-                      ul: ({ children }) => <ul className="mb-2 last:mb-0 list-disc list-inside">{children}</ul>,
-                      ol: ({ children }) => <ol className="mb-2 last:mb-0 list-decimal list-inside">{children}</ol>,
-                      li: ({ children }) => <li className="mb-1">{children}</li>,
-                      strong: ({ children }) => <strong className="font-semibold">{children}</strong>,
-                      em: ({ children }) => <em className="italic">{children}</em>,
-                    }}
-                  >
-                    {message.content}
-                  </ReactMarkdown>
+                  <div className="prose prose-sm max-w-none dark:prose-invert">
+                    <ReactMarkdown 
+                      components={{
+                        p: ({ children }) => <p className="mb-2 last:mb-0">{children}</p>,
+                        ul: ({ children }) => <ul className="mb-2 last:mb-0 list-disc list-inside">{children}</ul>,
+                        ol: ({ children }) => <ol className="mb-2 last:mb-0 list-decimal list-inside">{children}</ol>,
+                        li: ({ children }) => <li className="mb-1">{children}</li>,
+                        strong: ({ children }) => <strong className="font-semibold">{children}</strong>,
+                        em: ({ children }) => <em className="italic">{children}</em>,
+                      }}
+                    >
+                      {message.content}
+                    </ReactMarkdown>
+                  </div>
                 ) : (
                   message.content
                 )}

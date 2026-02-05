@@ -58,23 +58,31 @@ export default function ResultsPage() {
   const handleAskQuestion = useCallback(
     async (question: string) => {
       if (!results) {
-        console.error('No results available for chat');
+        console.error('[ResultsPage] No results available for chat');
         return 'No results available for chat';
       }
 
+      console.log('[ResultsPage] Asking question:', question);
+      console.log('[ResultsPage] Results ID:', results.id);
+      console.log('[ResultsPage] Language:', language);
+
       setAsking(true);
       try {
+        console.log('[ResultsPage] Calling askQuestion API...');
         const response = await askQuestion(results.id, question, language);
+        console.log('[ResultsPage] API response received:', response);
+        console.log('[ResultsPage] Response type:', typeof response);
         
         // Ensure we return a string
         if (response && response.answer && typeof response.answer === 'string') {
+          console.log('[ResultsPage] Returning answer:', response.answer);
           return response.answer;
         } else {
-          console.error('Invalid response format:', response);
+          console.error('[ResultsPage] Invalid response format:', response);
           return 'Sorry, I received an invalid response. Please try asking your question again.';
         }
       } catch (err) {
-        console.error('Q&A Error:', err);
+        console.error('[ResultsPage] Q&A Error:', err);
         return 'Sorry, I encountered an error. Please try again.';
       } finally {
         setAsking(false);

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import {
   Copy,
   Download,
@@ -40,6 +40,8 @@ export function ResultsDisplay({
   isAsking = false,
   defaultTab = 'summary',
 }: ResultsDisplayProps) {
+  console.log('[ResultsDisplay] Component rendered/re-rendered, isAsking:', isAsking);
+  
   const [copiedTab, setCopiedTab] = useState<string | null>(null);
   const [expandedSections, setExpandedSections] = useState<
     Record<number, boolean>
@@ -316,8 +318,8 @@ export function ResultsDisplay({
     </div>
   );
 
-  // Chat tab content
-  const ChatTab = useCallback(() => (
+  // Chat tab content - memoized to prevent re-mounting
+  const chatTabContent = useMemo(() => (
     <div className="space-y-4">
       {onAsking ? (
         <>
@@ -328,10 +330,10 @@ export function ResultsDisplay({
             </p>
           </div>
           <ChatWindow
-            key="chat-window" // Add stable key
+            key={`chat-${results.id}`} // Stable key based on interpretation ID
             onSendQuestion={onAsking}
             isLoading={isAsking}
-            interpretationId={results.id} // Pass the interpretation ID
+            interpretationId={results.id}
             suggestedQuestions={[
               "What do these results mean for my health?",
               "Are there any values I should be concerned about?",
@@ -354,7 +356,7 @@ export function ResultsDisplay({
         </div>
       )}
     </div>
-  ), [onAsking, isAsking]);
+  ), [onAsking, isAsking, results.id]);
 
   return (
     <div className="space-y-4 sm:space-y-6">
@@ -437,7 +439,7 @@ export function ResultsDisplay({
               <ActionsTab />
             </TabsContent>
             <TabsContent value="chat" className="mt-0">
-              <ChatTab />
+              {chatTabContent}
             </TabsContent>
           </div>
         </Card>
