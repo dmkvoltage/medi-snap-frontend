@@ -47,16 +47,16 @@ export default function InterpretationPage() {
   }, [isAuthenticated, id]);
 
   const handleAskQuestion = useCallback(
-    async (question: string) => {
-      if (!results) return;
+    async (question: string): Promise<string> => {
+      if (!results) return 'Error: No results available';
 
       setAsking(true);
       try {
         const response = await askQuestion(results.id, question, language);
-        return response.answer;
+        return response.answer || 'No answer received';
       } catch (err) {
         console.error('Q&A Error:', err);
-        // You might want to show a toast here
+        return 'Sorry, I encountered an error. Please try again.';
       } finally {
         setAsking(false);
       }

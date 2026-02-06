@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useRef, useState, useEffect } from 'react';
-import { Send, Loader2, MessageCircle, Paperclip, Image as ImageIcon } from 'lucide-react';
+import { Send, Loader2, MessageCircle, Paperclip, Image as ImageIcon, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -18,7 +18,7 @@ interface ChatWindowProps {
   onSendQuestion: (question: string) => Promise<string>;
   isLoading?: boolean;
   suggestedQuestions?: string[];
-  interpretationId?: string; // Add this to load chat history
+  interpretationId?: string;
 }
 
 export function ChatWindow({
@@ -41,13 +41,13 @@ export function ChatWindow({
   const scrollRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
-  const lastInterpretationId = useRef<string | undefined>();
+  const lastInterpretationId = useRef<string | undefined>(undefined);
 
   // Load chat history when component mounts or interpretationId changes
   useEffect(() => {
     if (interpretationId && interpretationId !== lastInterpretationId.current) {
       lastInterpretationId.current = interpretationId;
-      setHistoryLoaded(false); // Reset history loaded state for new interpretation
+      setHistoryLoaded(false);
       
       const loadChatHistory = async () => {
         console.log('[ChatWindow] Loading chat history for:', interpretationId);
@@ -65,9 +65,8 @@ export function ChatWindow({
           setHistoryLoaded(true);
         } catch (error) {
           console.error('[ChatWindow] Failed to load chat history:', error);
-          // Don't show error to user, just start with empty chat
-          setMessages([]); // Ensure we start with empty messages on error
-          setHistoryLoaded(true); // Mark as loaded even on error to prevent retry loops
+          setMessages([]);
+          setHistoryLoaded(true);
         } finally {
           setHistoryLoading(false);
         }
@@ -75,13 +74,12 @@ export function ChatWindow({
 
       loadChatHistory();
     }
-  }, [interpretationId]); // Remove historyLoaded from dependencies
+  }, [interpretationId]);
 
-  // Auto-scroll to bottom only when new messages are added (not when scrolling up)
+  // Auto-scroll to bottom only when new messages are added
   const lastMessageCount = useRef(0);
   useEffect(() => {
     if (scrollRef.current && messages.length > lastMessageCount.current) {
-      // Only auto-scroll if we're near the bottom (within 100px) or if it's the first load
       const scrollElement = scrollRef.current;
       const isNearBottom = scrollElement.scrollTop + scrollElement.clientHeight >= scrollElement.scrollHeight - 100;
       
@@ -111,9 +109,7 @@ export function ChatWindow({
         console.log('[ChatWindow] Calling onSendQuestion...');
         const response = await onSendQuestion(question);
         console.log('[ChatWindow] Raw response received:', response);
-        console.log('[ChatWindow] Response type:', typeof response);
 
-        // Ensure we have a valid response
         if (!response) {
           console.error('[ChatWindow] Received null/undefined response');
           const errorMessage: Message = {
@@ -125,21 +121,16 @@ export function ChatWindow({
           return;
         }
 
-        // Handle different response types
         let responseText = '';
         if (typeof response === 'string') {
           responseText = response;
-          console.log('[ChatWindow] Response is string:', responseText);
-        } else if (response && typeof response === 'object' && 'answer' in response) {
-          responseText = String(response.answer || '');
-          console.log('[ChatWindow] Response has answer property:', responseText);
+        } else if (response && typeof response === 'object') {
+          responseText = 'answer' in response ? String((response as { answer?: string }).answer || '') : String(response);
         } else if (response) {
           responseText = String(response);
-          console.log('[ChatWindow] Response converted to string:', responseText);
         }
 
         console.log('[ChatWindow] Final response text:', responseText);
-        console.log('[ChatWindow] Response text length:', responseText.length);
 
         if (responseText && responseText.trim()) {
           const assistantMessage: Message = {
@@ -147,15 +138,8 @@ export function ChatWindow({
             role: 'assistant',
             content: responseText,
           };
-          console.log('[ChatWindow] Adding assistant message:', assistantMessage);
-          setMessages((prev) => {
-            const newMessages = [...prev, assistantMessage];
-            console.log('[ChatWindow] New messages array:', newMessages);
-            return newMessages;
-          });
+          setMessages((prev) => [...prev, assistantMessage]);
         } else {
-          console.error('[ChatWindow] Empty response text, response was:', response);
-          // Add error message to chat
           const errorMessage: Message = {
             id: (Date.now() + 1).toString(),
             role: 'assistant',
@@ -165,7 +149,6 @@ export function ChatWindow({
         }
       } catch (error) {
         console.error('[ChatWindow] Error sending question:', error);
-        // Add error message to chat
         const errorMessage: Message = {
           id: (Date.now() + 1).toString(),
           role: 'assistant',
@@ -201,72 +184,77 @@ export function ChatWindow({
   };
 
   return (
-    <div className="flex flex-col gap-3 rounded-[28px] border border-border bg-background shadow-[0_12px_36px_rgba(0,0,0,0.08)] overflow-hidden">
-      {/* Header (inspired by the reference image, Google-branded palette) */}
-      <div className="px-4 sm:px-5 pt-4">
-        <div className="rounded-[22px] px-4 sm:px-5 py-3 sm:py-3.5 bg-gradient-to-br from-primary via-sky-500 to-cyan-500 text-white shadow-[0_10px_26px_rgba(66,133,244,0.35)]">
+    <div className="flex flex-col gap-4 rounded-[28px] border border-border/60 bg-gradient-to-br from-card to-muted/20 shadow-[0_12px_40px_rgba(0,0,0,0.1)] overflow-hidden animate-fade-in-up">
+      {/* Header with gradient */}
+      <div className="px-5 pt-5">
+        <div className="rounded-[24px] px-5 py-4 bg-gradient-to-br from-primary via-blue-500 to-cyan-500 text-white shadow-[0_10px_30px_rgba(66,133,244,0.35)]">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-full bg-white/20 ring-2 ring-white/40 flex items-center justify-center">
-                <span className="text-sm font-semibold">MS</span>
+              <div className="h-12 w-12 rounded-full bg-white/20 ring-2 ring-white/40 flex items-center justify-center shadow-inner">
+                <Sparkles className="h-6 w-6" />
               </div>
               <div className="leading-tight">
                 <p className="text-xs text-white/80">Chat with</p>
-                <p className="text-sm sm:text-base font-semibold">Med8d AI</p>
+                <p className="text-lg font-bold">Med8d AI</p>
               </div>
             </div>
-            <div className="flex items-center gap-2 text-white/80">
-              <span className="inline-flex items-center gap-2 text-[10px] sm:text-xs">
-                <span className="h-2 w-2 rounded-full bg-green-300 animate-pulse" />
-                Online
+            <div className="flex items-center gap-2">
+              <span className="inline-flex items-center gap-2 text-xs bg-white/20 px-3 py-1.5 rounded-full">
+                <span className="h-2.5 w-2.5 rounded-full bg-green-300 animate-pulse" />
+                <span className="font-medium">Online</span>
               </span>
             </div>
           </div>
-          <div className="mt-3 sm:mt-4 inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-1.5">
-            <span className="text-[10px] sm:text-xs">General info only</span>
+          <div className="mt-4 flex items-center gap-2 bg-white/15 px-4 py-2 rounded-full">
+            <Sparkles className="h-4 w-4 text-white/70" />
+            <span className="text-sm font-medium text-white/90">General information only</span>
           </div>
         </div>
       </div>
+
       {/* Messages */}
       <ScrollArea
         ref={scrollRef}
-        className="h-64 sm:h-80 px-4 sm:px-5 py-4 space-y-3"
+        className="h-64 sm:h-80 px-5 py-4 space-y-4"
       >
-        <div className="space-y-3">
+        <div className="space-y-4">
           {historyLoading && (
-            <div className="flex flex-col items-center justify-center h-full text-center">
-              <div className="rounded-2xl bg-primary/10 p-3 mb-3">
-                <Loader2 className="h-6 w-6 text-primary animate-spin" aria-hidden="true" />
+            <div className="flex flex-col items-center justify-center h-full text-center py-8">
+              <div className="rounded-2xl bg-primary/10 p-4 mb-4">
+                <Loader2 className="h-8 w-8 text-primary animate-spin" aria-hidden="true" />
               </div>
-              <p className="text-sm text-muted-foreground">
-                Loading chat history...
-              </p>
+              <p className="text-muted-foreground font-medium">Loading chat history...</p>
             </div>
           )}
 
           {!historyLoading && messages.length === 0 && (
-            <div className="flex flex-col items-center justify-center h-full text-center">
-              <div className="rounded-2xl bg-primary/10 p-3 mb-3">
-                <MessageCircle className="h-6 w-6 text-primary" aria-hidden="true" />
+            <div className="flex flex-col items-center justify-center h-full text-center py-8">
+              <div className="rounded-2xl bg-gradient-to-br from-primary/10 to-blue-500/10 p-4 mb-4">
+                <MessageCircle className="h-8 w-8 text-primary" aria-hidden="true" />
               </div>
-              <p className="text-sm text-muted-foreground">
-                Ask a question to get started
-              </p>
+              <p className="text-muted-foreground font-medium mb-2">Ask a question to get started</p>
+              <p className="text-sm text-muted-foreground/70">Get clarifications about your medical document</p>
             </div>
           )}
 
-          {!historyLoading && messages.map((message) => (
+          {!historyLoading && messages.map((message, index) => (
             <div
               key={message.id}
-              className={`flex gap-3 animate-in fade-in ${
+              className={`flex gap-3 animate-in fade-in slide-in-from-bottom-2 ${
                 message.role === 'user' ? 'justify-end' : 'justify-start'
               }`}
+              style={{ animationDelay: `${index * 0.05}s` }}
             >
+              {message.role === 'assistant' && (
+                <div className="flex-shrink-0 h-8 w-8 rounded-full bg-gradient-to-br from-primary to-blue-500 flex items-center justify-center shadow-md">
+                  <Sparkles className="h-4 w-4 text-white" />
+                </div>
+              )}
               <div
-                className={`max-w-xs sm:max-w-sm px-4 py-3 rounded-2xl text-sm leading-relaxed ${
+                className={`max-w-[85%] sm:max-w-[75%] px-4 py-3 rounded-2xl text-sm leading-relaxed ${
                   message.role === 'user'
-                    ? 'bg-primary text-primary-foreground rounded-br-none shadow-[0_8px_18px_rgba(66,133,244,0.25)]'
-                    : 'bg-muted/40 border border-border text-foreground rounded-bl-none'
+                    ? 'bg-gradient-to-r from-primary to-blue-600 text-white rounded-br-sm shadow-lg shadow-primary/25'
+                    : 'bg-gradient-to-br from-muted/60 to-muted/30 border border-border rounded-bl-sm'
                 }`}
               >
                 {message.role === 'assistant' ? (
@@ -277,7 +265,7 @@ export function ChatWindow({
                         ul: ({ children }) => <ul className="mb-2 last:mb-0 list-disc list-inside">{children}</ul>,
                         ol: ({ children }) => <ol className="mb-2 last:mb-0 list-decimal list-inside">{children}</ol>,
                         li: ({ children }) => <li className="mb-1">{children}</li>,
-                        strong: ({ children }) => <strong className="font-semibold">{children}</strong>,
+                        strong: ({ children }) => <strong className="font-bold text-primary">{children}</strong>,
                         em: ({ children }) => <em className="italic">{children}</em>,
                       }}
                     >
@@ -285,16 +273,24 @@ export function ChatWindow({
                     </ReactMarkdown>
                   </div>
                 ) : (
-                  message.content
+                  <span className="font-medium">{message.content}</span>
                 )}
               </div>
+              {message.role === 'user' && (
+                <div className="flex-shrink-0 h-8 w-8 rounded-full bg-gradient-to-br from-accent to-amber-500 flex items-center justify-center shadow-md">
+                  <span className="text-xs font-bold text-white">You</span>
+                </div>
+              )}
             </div>
           ))}
 
           {localLoading && (
-            <div className="flex gap-3 justify-start">
-              <div className="max-w-xs sm:max-w-sm px-4 py-3 rounded-2xl bg-background border border-border rounded-bl-none">
-                <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+            <div className="flex gap-3 justify-start animate-in fade-in">
+              <div className="flex-shrink-0 h-8 w-8 rounded-full bg-gradient-to-br from-primary to-blue-500 flex items-center justify-center">
+                <Sparkles className="h-4 w-4 text-white animate-pulse" />
+              </div>
+              <div className="max-w-[50px] px-4 py-3 rounded-2xl rounded-bl-sm bg-gradient-to-br from-muted/60 to-muted/30 border border-border flex items-center justify-center">
+                <Loader2 className="h-4 w-4 animate-spin text-primary" aria-hidden="true" />
               </div>
             </div>
           )}
@@ -303,21 +299,21 @@ export function ChatWindow({
 
       {/* Suggested Questions */}
       {!historyLoading && messages.length === 0 && (
-        <div className="px-4 sm:px-5 pb-3 space-y-2">
-          <p className="text-xs text-muted-foreground font-medium">Quick Questions</p>
+        <div className="px-5 pb-3 space-y-3">
+          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Quick Questions</p>
           <div className="flex flex-wrap gap-2">
             {suggestedQuestions.map((q, index) => (
               <button
                 key={q}
                 onClick={() => handleSendQuestion(q)}
-                className={`text-xs px-3 py-2 rounded-full border transition-all ${
+                className={`text-sm px-4 py-2 rounded-full border transition-all duration-200 hover:scale-105 ${
                   index % 4 === 0
-                    ? 'border-primary/40 text-primary hover:bg-primary/10'
+                    ? 'border-primary/40 text-primary hover:bg-primary/10 shadow-sm'
                     : index % 4 === 1
-                    ? 'border-destructive/40 text-destructive hover:bg-destructive/10'
+                    ? 'border-destructive/40 text-destructive hover:bg-destructive/10 shadow-sm'
                     : index % 4 === 2
-                    ? 'border-accent/60 text-foreground hover:bg-accent/20'
-                    : 'border-secondary/40 text-secondary hover:bg-secondary/10'
+                    ? 'border-accent/60 text-foreground hover:bg-accent/20 shadow-sm'
+                    : 'border-secondary/40 text-secondary hover:bg-secondary/10 shadow-sm'
                 }`}
               >
                 {q}
@@ -328,7 +324,7 @@ export function ChatWindow({
       )}
 
       {/* Input */}
-      <form onSubmit={handleSubmit} className="p-4 sm:p-5 border-t border-border">
+      <form onSubmit={handleSubmit} className="p-5 border-t border-border/50">
         <div className="flex items-center gap-2">
           <input
             ref={fileInputRef}
@@ -350,7 +346,7 @@ export function ChatWindow({
           <div className="flex items-center gap-1.5">
             <button
               type="button"
-              className="h-10 w-10 rounded-full border border-border bg-background hover:bg-muted/50 text-muted-foreground hover:text-foreground transition-colors"
+              className="h-11 w-11 rounded-full border border-border/60 bg-gradient-to-br from-muted/50 to-muted hover:from-muted hover:to-muted/80 text-muted-foreground hover:text-foreground transition-all duration-200 hover:scale-105 shadow-sm"
               aria-label="Attach file"
               onClick={() => fileInputRef.current?.click()}
             >
@@ -358,7 +354,7 @@ export function ChatWindow({
             </button>
             <button
               type="button"
-              className="h-10 w-10 rounded-full border border-border bg-background hover:bg-muted/50 text-muted-foreground hover:text-foreground transition-colors"
+              className="h-11 w-11 rounded-full border border-border/60 bg-gradient-to-br from-muted/50 to-muted hover:from-muted hover:to-muted/80 text-muted-foreground hover:text-foreground transition-all duration-200 hover:scale-105 shadow-sm"
               aria-label="Attach image"
               onClick={() => imageInputRef.current?.click()}
             >
@@ -370,18 +366,18 @@ export function ChatWindow({
             onChange={(e) => setInput(e.target.value)}
             placeholder="Ask a question..."
             disabled={localLoading || isLoading}
-            className="rounded-full h-11 bg-background border-border"
+            className="rounded-full h-12 bg-gradient-to-br from-muted/50 to-muted border-border/60 shadow-inner focus:shadow-md transition-all duration-200"
           />
           <Button
             type="submit"
             disabled={!input.trim() || localLoading || isLoading}
-            size="sm"
-            className="rounded-full h-11 w-11 p-0 bg-primary hover:bg-primary/90 shadow-[0_10px_20px_rgba(66,133,244,0.35)]"
+            size="lg"
+            className="rounded-full h-12 w-12 p-0 bg-gradient-to-r from-primary to-blue-600 hover:from-primary/90 hover:to-blue-600/90 shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30 transition-all duration-200 hover:scale-105"
           >
             {localLoading || isLoading ? (
-              <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+              <Loader2 className="h-5 w-5 animate-spin" aria-hidden="true" />
             ) : (
-              <Send className="h-4 w-4" aria-hidden="true" />
+              <Send className="h-5 w-5" aria-hidden="true" />
             )}
           </Button>
         </div>

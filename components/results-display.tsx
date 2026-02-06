@@ -9,10 +9,12 @@ import {
   CheckCircle2,
   AlertCircle,
   Lightbulb,
-  Plus,
   BookOpen,
   RotateCcw,
   MessageCircle,
+  Sparkles,
+  ArrowRight,
+  FileText,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -66,61 +68,71 @@ export function ResultsDisplay({
 
   // Summary tab content
   const SummaryTab = () => (
-    <div className="space-y-4">
-      <div className="rounded-2xl bg-gradient-to-br from-primary/10 to-accent/10 border border-primary/20 p-5 sm:p-6">
-        <div className="flex items-start gap-3 sm:gap-4">
-          <div className="rounded-xl bg-primary/20 p-2.5 flex-shrink-0 mt-1">
-            <Lightbulb className="h-5 w-5 text-primary" aria-hidden="true" />
+    <div className="space-y-6">
+      <div className="rounded-3xl bg-gradient-to-br from-primary/10 via-background to-secondary/10 border border-primary/20 p-6 sm:p-8 shadow-lg">
+        <div className="flex items-start gap-4 sm:gap-5">
+          <div className="rounded-2xl bg-gradient-to-br from-primary/20 to-blue-500/20 p-3 sm:p-4 flex-shrink-0 mt-1">
+            <Lightbulb className="h-6 w-6 text-primary" aria-hidden="true" />
           </div>
           <div className="flex-1 min-w-0">
-            <h3 className="font-semibold text-foreground mb-2 text-sm sm:text-base">
+            <h3 className="font-bold text-lg sm:text-xl text-foreground mb-3 flex items-center gap-2">
+              <Sparkles className="h-4 w-4 text-primary" />
               Plain Language Summary
             </h3>
-            <p className="text-sm text-foreground leading-relaxed">
+            <p className="text-base sm:text-lg text-foreground leading-relaxed">
               {results.interpretation.summary}
             </p>
           </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-2 sm:gap-3 sm:grid-cols-3">
-        <div className="rounded-2xl bg-muted p-3 sm:p-4 text-center">
+      <div className="grid grid-cols-3 gap-3 sm:gap-4">
+        <div className="rounded-2xl bg-gradient-to-br from-primary/10 to-primary/5 p-4 sm:p-5 text-center hover:shadow-md transition-shadow duration-200">
+          <div className="flex items-center justify-center gap-1 mb-2">
+            <FileText className="h-4 w-4 text-primary" />
+          </div>
           <div className="text-xs text-muted-foreground mb-1">Document Type</div>
-          <div className="text-xs sm:text-sm font-semibold text-foreground truncate">
+          <div className="text-sm sm:text-base font-bold text-foreground truncate">
             {results.document_type}
           </div>
         </div>
-        <div className="rounded-2xl bg-muted p-3 sm:p-4 text-center">
+        <div className="rounded-2xl bg-gradient-to-br from-secondary/10 to-green-500/5 p-4 sm:p-5 text-center hover:shadow-md transition-shadow duration-200">
+          <div className="flex items-center justify-center gap-1 mb-2">
+            <Sparkles className="h-4 w-4 text-secondary" />
+          </div>
           <div className="text-xs text-muted-foreground mb-1">Confidence</div>
-          <div className="text-xs sm:text-sm font-semibold text-foreground">
+          <div className="text-sm sm:text-base font-bold text-foreground">
             {Math.round(results.confidence * 100)}%
           </div>
         </div>
-        <div className="rounded-2xl bg-muted p-3 sm:p-4 text-center col-span-2 sm:col-span-1">
+        <div className="rounded-2xl bg-gradient-to-br from-accent/10 to-amber-500/5 p-4 sm:p-5 text-center hover:shadow-md transition-shadow duration-200">
+          <div className="flex items-center justify-center gap-1 mb-2">
+            <ArrowRight className="h-4 w-4 text-accent" />
+          </div>
           <div className="text-xs text-muted-foreground mb-1">Time</div>
-          <div className="text-xs sm:text-sm font-semibold text-foreground">
+          <div className="text-sm sm:text-base font-bold text-foreground">
             {(results.processingTime / 1000).toFixed(2)}s
           </div>
         </div>
       </div>
 
-      <div className="flex gap-2">
+      <div className="flex gap-3">
         <Button
           onClick={() =>
             handleCopy(results.interpretation.summary, 'summary')
           }
           variant="outline"
-          className="flex-1 rounded-2xl h-10"
+          className="flex-1 rounded-full h-12 hover:bg-muted/50 transition-all duration-200"
         >
           {copiedTab === 'summary' ? (
             <>
-              <CheckCircle2 className="mr-2 h-4 w-4 text-green-600" />
-              <span className="hidden sm:inline">Copied</span>
+              <CheckCircle2 className="mr-2 h-5 w-5 text-green-600" />
+              <span>Copied!</span>
             </>
           ) : (
             <>
-              <Copy className="mr-2 h-4 w-4" />
-              <span className="hidden sm:inline">Copy</span>
+              <Copy className="mr-2 h-5 w-5" />
+              <span>Copy Summary</span>
             </>
           )}
         </Button>
@@ -139,10 +151,10 @@ export function ResultsDisplay({
             document.body.removeChild(element);
           }}
           variant="outline"
-          className="flex-1 rounded-2xl h-10"
+          className="flex-1 rounded-full h-12 hover:bg-muted/50 transition-all duration-200"
         >
-          <Download className="mr-2 h-4 w-4" />
-          <span className="hidden sm:inline">Download</span>
+          <Download className="mr-2 h-5 w-5" />
+          <span>Download</span>
         </Button>
       </div>
     </div>
@@ -150,171 +162,202 @@ export function ResultsDisplay({
 
   // Details tab content
   const DetailsTab = () => (
-    <div className="space-y-3">
+    <div className="space-y-4">
       {results.interpretation.sections.map((section, index) => (
-        <div key={index} className="rounded-2xl border border-border overflow-hidden">
+        <Card
+          key={index}
+          className={`
+            rounded-2xl border border-border/60 overflow-hidden
+            transition-all duration-300
+            ${expandedSections[index] ? 'shadow-lg' : 'shadow-sm'}
+          `}
+        >
           <button
             onClick={() => toggleSection(index)}
-            className="w-full p-4 flex items-center justify-between hover:bg-muted/50 transition-colors"
+            className="w-full p-5 flex items-center justify-between hover:bg-muted/30 transition-colors"
           >
-            <span className="font-semibold text-sm text-foreground text-left">
+            <span className="font-bold text-base text-foreground text-left flex items-center gap-2">
+              <span className="flex items-center justify-center h-8 w-8 rounded-lg bg-primary/10 text-primary text-sm font-bold">
+                {index + 1}
+              </span>
               Section {index + 1}
             </span>
             <ChevronDown
-              className={`h-4 w-4 transition-transform flex-shrink-0 ${
-                expandedSections[index] ? 'rotate-180' : ''
+              className={`h-5 w-5 transition-transform duration-300 flex-shrink-0 ${
+                expandedSections[index] ? 'rotate-180 text-primary' : ''
               }`}
               aria-hidden="true"
             />
           </button>
 
           {expandedSections[index] && (
-            <div className="border-t border-border px-4 py-4 space-y-4 bg-muted/30">
+            <div className="border-t border-border/60 px-5 py-5 space-y-4 bg-gradient-to-br from-muted/20 to-background">
               <div>
-                <h4 className="text-xs font-semibold text-muted-foreground mb-2 uppercase">
+                <h4 className="text-xs font-bold text-muted-foreground mb-3 uppercase tracking-wider flex items-center gap-2">
+                  <FileText className="h-3 w-3" />
                   Original
                 </h4>
-                <p className="text-sm text-foreground bg-background rounded-xl p-3 font-mono text-xs leading-relaxed">
+                <p className="text-sm text-foreground bg-gradient-to-br from-muted/50 to-muted/30 rounded-xl p-4 font-mono leading-relaxed border border-border/50">
                   {section.original}
                 </p>
               </div>
               <div>
-                <h4 className="text-xs font-semibold text-muted-foreground mb-2 uppercase">
+                <h4 className="text-xs font-bold text-primary mb-3 uppercase tracking-wider flex items-center gap-2">
+                  <Lightbulb className="h-3 w-3" />
                   Simplified
                 </h4>
-                <p className="text-sm text-foreground leading-relaxed">
+                <p className="text-base text-foreground leading-relaxed bg-gradient-to-br from-primary/5 to-blue-500/5 rounded-xl p-4 border border-primary/10">
                   {section.simplified}
                 </p>
               </div>
             </div>
           )}
-        </div>
+        </Card>
       ))}
     </div>
   );
 
   // Terms tab content
   const TermsTab = () => (
-    <div className="space-y-3">
+    <div className="space-y-4">
       {medicalTerms && medicalTerms.length > 0 ? (
         medicalTerms.map((termObj, index) => (
-          <div
+          <Card
             key={index}
-            className="rounded-xl border border-border p-4 hover:bg-muted/50 transition-colors"
+            className={`
+              rounded-2xl border border-border/60 p-5
+              bg-gradient-to-br from-card to-muted/20
+              hover:shadow-md hover:border-primary/30
+              transition-all duration-300
+              card-lift
+            `}
           >
-            <div className="flex items-start gap-3">
-              <div className="rounded-lg bg-primary/10 p-2 flex-shrink-0 mt-1">
-                <BookOpen className="h-4 w-4 text-primary" aria-hidden="true" />
+            <div className="flex items-start gap-4">
+              <div className="rounded-xl bg-gradient-to-br from-primary/10 to-blue-500/10 p-3 flex-shrink-0 mt-1">
+                <BookOpen className="h-5 w-5 text-primary" aria-hidden="true" />
               </div>
               <div className="flex-1 min-w-0">
-                <div className="flex items-start justify-between gap-2">
-                  <h4 className="font-semibold text-foreground text-sm">
+                <div className="flex items-start justify-between gap-3">
+                  <h4 className="font-bold text-foreground text-base">
                     {termObj.term}
                   </h4>
                   {termObj.importance && (
-                    <span className={`text-xs font-medium px-2 py-1 rounded-full whitespace-nowrap ${
+                    <span className={`text-xs font-bold px-3 py-1.5 rounded-full whitespace-nowrap shadow-sm ${
                       termObj.importance === 'high'
-                        ? 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-200'
+                        ? 'bg-gradient-to-r from-red-100 to-red-50 text-red-700 dark:from-red-900/50 dark:to-red-800/50 dark:text-red-200'
                         : termObj.importance === 'medium'
-                          ? 'bg-amber-100 text-amber-700 dark:bg-amber-900 dark:text-amber-200'
-                          : 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-200'
+                          ? 'bg-gradient-to-r from-amber-100 to-amber-50 text-amber-700 dark:from-amber-900/50 dark:to-amber-800/50 dark:text-amber-200'
+                          : 'bg-gradient-to-r from-green-100 to-green-50 text-green-700 dark:from-green-900/50 dark:to-green-800/50 dark:text-green-200'
                     }`}>
-                      {termObj.importance}
+                      {termObj.importance.toUpperCase()}
                     </span>
                   )}
                 </div>
-                <p className="text-xs sm:text-sm text-muted-foreground mt-2">
+                <p className="text-sm sm:text-base text-muted-foreground mt-3 leading-relaxed">
                   {termObj.definition}
                 </p>
               </div>
             </div>
-          </div>
+          </Card>
         ))
       ) : (
-        <div className="text-center py-8 text-muted-foreground">
-          <p className="text-sm">No medical terms to define</p>
-        </div>
+        <Card className="rounded-2xl border border-border/60 p-10 text-center bg-gradient-to-br from-card to-muted/20">
+          <BookOpen className="h-12 w-12 text-muted-foreground/50 mx-auto mb-4" />
+          <h3 className="font-bold text-foreground mb-2">No medical terms found</h3>
+          <p className="text-muted-foreground">This document doesn't contain complex medical terminology.</p>
+        </Card>
       )}
     </div>
   );
 
   // Actions tab content
   const ActionsTab = () => (
-    <div className="space-y-4">
+    <div className="space-y-5">
       {results.interpretation.warnings && results.interpretation.warnings.length > 0 && (
-        <Card className="p-4 sm:p-6 rounded-2xl border-red-200 bg-red-50 dark:bg-red-950/30 dark:border-red-900">
-          <h3 className="font-semibold text-red-900 dark:text-red-200 mb-3 flex items-center gap-2">
-            <AlertCircle className="h-5 w-5 flex-shrink-0" aria-hidden="true" />
+        <Card className="rounded-2xl border-2 border-red-200 bg-gradient-to-br from-red-50 to-red-100/50 dark:from-red-950/30 dark:to-red-900/20 dark:border-red-800 p-6 shadow-lg shadow-red-200/20">
+          <h3 className="font-bold text-red-900 dark:text-red-200 mb-4 flex items-center gap-2">
+            <AlertCircle className="h-5 w-5" />
             <span>Important Warnings</span>
           </h3>
-          <ul className="space-y-2 text-sm text-red-800 dark:text-red-300">
+          <ul className="space-y-3 text-sm text-red-800 dark:text-red-300">
             {results.interpretation.warnings.map((warning, i) => (
-              <li key={i} className="flex gap-2">
-                <span>•</span>
-                <span>{warning}</span>
+              <li key={i} className="flex gap-3 items-start">
+                <span className="flex h-6 w-6 items-center justify-center rounded-full bg-red-200 dark:bg-red-800 text-xs font-bold flex-shrink-0 mt-0.5">
+                  {i + 1}
+                </span>
+                <span className="leading-relaxed">{warning}</span>
               </li>
             ))}
           </ul>
         </Card>
       )}
 
-      <Card className="p-4 sm:p-6 rounded-2xl border-border bg-gradient-to-br from-primary/5 to-accent/5">
-        <h3 className="font-semibold text-foreground mb-4 flex items-center gap-2">
-          <AlertCircle className="h-5 w-5 text-primary flex-shrink-0" aria-hidden="true" />
+      <Card className="rounded-2xl border border-border/60 bg-gradient-to-br from-primary/5 to-blue-500/5 p-6 shadow-lg">
+        <h3 className="font-bold text-foreground mb-5 flex items-center gap-2">
+          <Lightbulb className="h-5 w-5 text-primary" />
           <span>Next Steps</span>
         </h3>
-        <ol className="space-y-3 text-sm text-foreground">
+        <ol className="space-y-4 text-base text-foreground">
           {results.interpretation.nextSteps && results.interpretation.nextSteps.length > 0 ? (
             results.interpretation.nextSteps.map((step, i) => (
-              <li key={i} className="flex gap-3">
-                <span className="font-bold text-primary flex-shrink-0 w-6">{i + 1}.</span>
-                <span>{step}</span>
+              <li key={i} className="flex gap-4 items-start">
+                <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-blue-600 text-white font-bold text-sm flex-shrink-0 shadow-lg shadow-primary/25">
+                  {i + 1}
+                </span>
+                <span className="leading-relaxed pt-1">{step}</span>
               </li>
             ))
           ) : (
             <>
-              <li className="flex gap-3">
-                <span className="font-bold text-primary flex-shrink-0 w-6">1.</span>
-                <span>Review the plain language summary above</span>
+              <li className="flex gap-4 items-start">
+                <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-blue-600 text-white font-bold text-sm flex-shrink-0 shadow-lg shadow-primary/25">
+                  1
+                </span>
+                <span className="leading-relaxed pt-1">Review the plain language summary above</span>
               </li>
-              <li className="flex gap-3">
-                <span className="font-bold text-primary flex-shrink-0 w-6">2.</span>
-                <span>Use the Chat tab to ask questions for clarification</span>
+              <li className="flex gap-4 items-start">
+                <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-blue-600 text-white font-bold text-sm flex-shrink-0 shadow-lg shadow-primary/25">
+                  2
+                </span>
+                <span className="leading-relaxed pt-1">Use the Chat tab to ask questions for clarification</span>
               </li>
-              <li className="flex gap-3">
-                <span className="font-bold text-primary flex-shrink-0 w-6">3.</span>
-                <span>Share with your healthcare provider</span>
+              <li className="flex gap-4 items-start">
+                <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-blue-600 text-white font-bold text-sm flex-shrink-0 shadow-lg shadow-primary/25">
+                  3
+                </span>
+                <span className="leading-relaxed pt-1">Share with your healthcare provider</span>
               </li>
             </>
           )}
         </ol>
       </Card>
 
-      <Card className="p-4 sm:p-6 rounded-2xl border-border bg-green-50 dark:bg-green-950/30 border-green-200 dark:border-green-900">
-        <h3 className="font-semibold text-green-900 dark:text-green-200 mb-3 flex items-center gap-2">
-          <CheckCircle2 className="h-5 w-5 flex-shrink-0" aria-hidden="true" />
+      <Card className="rounded-2xl border-2 border-green-200 bg-gradient-to-br from-green-50 to-green-100/50 dark:from-green-950/30 dark:to-green-900/20 dark:border-green-800 p-6 shadow-lg shadow-green-200/20">
+        <h3 className="font-bold text-green-900 dark:text-green-200 mb-3 flex items-center gap-2">
+          <CheckCircle2 className="h-5 w-5" />
           <span>Privacy Protected</span>
         </h3>
         <p className="text-sm text-green-800 dark:text-green-300 leading-relaxed">
-          Your document is processed securely and automatically deleted when you close this page. We never store your medical information.
+          Your document is processed securely and automatically deleted when you close this page. 
+          We never store your medical information. Your data stays yours.
         </p>
       </Card>
 
       {onAsking && (
-        <Card className="p-4 sm:p-6 rounded-2xl border-border bg-blue-50 dark:bg-blue-950/30 border-blue-200 dark:border-blue-900">
-          <h3 className="font-semibold text-blue-900 dark:text-blue-200 mb-3 flex items-center gap-2">
-            <MessageCircle className="h-5 w-5 flex-shrink-0" aria-hidden="true" />
+        <Card className="rounded-2xl border-2 border-blue-200 bg-gradient-to-br from-blue-50 to-blue-100/50 dark:from-blue-950/30 dark:to-blue-900/20 dark:border-blue-800 p-6 shadow-lg shadow-blue-200/20">
+          <h3 className="font-bold text-blue-900 dark:text-blue-200 mb-3 flex items-center gap-2">
+            <MessageCircle className="h-5 w-5" />
             <span>Have Questions?</span>
           </h3>
-          <p className="text-sm text-blue-800 dark:text-blue-300 leading-relaxed mb-3">
+          <p className="text-sm text-blue-800 dark:text-blue-300 leading-relaxed mb-4">
             Switch to the Chat tab to ask follow-up questions about your medical document in plain language.
           </p>
-          <div className="text-xs text-blue-700 dark:text-blue-400">
-            💡 Try asking: "What should I discuss with my doctor?" or "Are there any concerns?"
+          <div className="flex items-center gap-2 text-xs text-blue-700 dark:text-blue-400 bg-blue-100 dark:bg-blue-900/50 rounded-lg px-4 py-3">
+            <Sparkles className="h-4 w-4" />
+            <span>💡 Try asking: "What should I discuss with my doctor?"</span>
           </div>
         </Card>
       )}
-
     </div>
   );
 
@@ -325,12 +368,15 @@ export function ResultsDisplay({
       <div className="space-y-4">
         {onAsking ? (
           <>
-            <div className="text-center space-y-2 mb-6">
-              <h3 className="font-semibold text-foreground">Ask Questions</h3>
-              <p className="text-sm text-muted-foreground">
+            <Card className="rounded-2xl border border-border/60 bg-gradient-to-br from-card to-muted/20 p-6 text-center">
+              <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-primary/20 to-blue-500/20 flex items-center justify-center">
+                <MessageCircle className="h-8 w-8 text-primary" />
+              </div>
+              <h3 className="font-bold text-xl text-foreground mb-2">Ask Questions</h3>
+              <p className="text-muted-foreground leading-relaxed">
                 Get clarifications about your medical document in plain language
               </p>
-            </div>
+            </Card>
             <ChatWindow
               key={`chat-${results.id}`} // Stable key based on interpretation ID
               onSendQuestion={onAsking}
@@ -347,80 +393,83 @@ export function ResultsDisplay({
             />
           </>
         ) : (
-          <div className="text-center py-8">
-            <div className="rounded-2xl bg-muted/50 p-6 max-w-sm mx-auto">
-              <MessageCircle className="h-8 w-8 text-muted-foreground mx-auto mb-3" />
-              <h3 className="font-medium text-foreground mb-2">Chat Not Available</h3>
-              <p className="text-sm text-muted-foreground">
-                Chat functionality is not available for this session.
-              </p>
-            </div>
-          </div>
+          <Card className="rounded-2xl border border-border/60 p-10 text-center bg-gradient-to-br from-card to-muted/20">
+            <MessageCircle className="h-16 w-16 text-muted-foreground/30 mx-auto mb-4" />
+            <h3 className="font-bold text-foreground mb-2 text-xl">Chat Not Available</h3>
+            <p className="text-muted-foreground">
+              Chat functionality is not available for this session.
+            </p>
+          </Card>
         )}
       </div>
     );
-  }, [onAsking, results.id]); // Remove isAsking from dependencies to prevent re-mounting
+  }, [onAsking, results.id]);
 
   return (
-    <div className="space-y-4 sm:space-y-6">
-      {/* Top Action Bar - Google Style */}
-      <div className="flex items-center justify-between gap-3 flex-wrap">
+    <div className="space-y-6 sm:space-y-8 animate-fade-in-up">
+      {/* Top Action Bar */}
+      <div className="flex items-center justify-between gap-4 flex-wrap">
         <div>
-          <h2 className="text-2xl sm:text-3xl font-bold text-foreground">
+          <h2 className="text-3xl sm:text-4xl font-bold text-foreground flex items-center gap-3">
+            <Sparkles className="h-7 w-7 text-primary animate-pulse" />
             Results
           </h2>
-          <p className="text-sm text-muted-foreground mt-1">
-            {results.document_type} • {Math.round(results.confidence * 100)}% confidence
+          <p className="text-base sm:text-lg text-muted-foreground mt-2 flex items-center gap-2">
+            <span className="px-3 py-1 bg-primary/10 rounded-full text-primary font-semibold text-sm">
+              {results.document_type}
+            </span>
+            <span className="text-muted-foreground/60">•</span>
+            <span className="text-sm font-medium">
+              {Math.round(results.confidence * 100)}% confidence
+            </span>
           </p>
         </div>
-        <div className="flex gap-2">
-          <Button
-            onClick={onNewDocument}
-            variant="outline"
-            className="rounded-full h-10 px-4 gap-2 border-border bg-transparent"
-          >
-            <RotateCcw className="h-4 w-4" aria-hidden="true" />
-            <span className="hidden sm:inline">New</span>
-          </Button>
-        </div>
+        <Button
+          onClick={onNewDocument}
+          variant="outline"
+          className="rounded-full h-12 px-6 gap-2 border-2 hover:bg-muted/50 transition-all duration-200"
+        >
+          <RotateCcw className="h-4 w-4" />
+          <span className="font-semibold">New Analysis</span>
+        </Button>
       </div>
 
       {/* Cohesive Results Card */}
       <Tabs defaultValue={defaultTab} className="w-full">
-        <Card className="rounded-2xl border-border overflow-hidden">
+        <Card className="rounded-3xl border border-border/60 overflow-hidden shadow-xl">
           {/* Tab List */}
-          <TabsList className="w-full grid grid-cols-5 rounded-none border-b border-border bg-transparent p-0 h-auto">
+          <TabsList className="w-full grid grid-cols-5 rounded-none border-b border-border/60 bg-gradient-to-r from-muted/30 to-transparent p-0 h-auto">
             <TabsTrigger
               value="summary"
-              className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-muted/50 px-2 py-4 text-xs sm:text-sm font-medium transition-colors"
+              className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-primary/5 px-4 py-5 text-sm font-semibold transition-all duration-200"
             >
               <span className="hidden sm:inline">Summary</span>
               <span className="sm:hidden">Info</span>
             </TabsTrigger>
             <TabsTrigger
               value="details"
-              className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-muted/50 px-2 py-4 text-xs sm:text-sm font-medium transition-colors"
+              className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-primary/5 px-4 py-5 text-sm font-semibold transition-all duration-200"
             >
               <span className="hidden sm:inline">Details</span>
               <span className="sm:hidden">Detail</span>
             </TabsTrigger>
             <TabsTrigger
               value="terms"
-              className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-muted/50 px-2 py-4 text-xs sm:text-sm font-medium transition-colors"
+              className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-primary/5 px-4 py-5 text-sm font-semibold transition-all duration-200"
             >
               <span className="hidden sm:inline">Terms</span>
               <span className="sm:hidden">Terms</span>
             </TabsTrigger>
             <TabsTrigger
               value="actions"
-              className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-muted/50 px-2 py-4 text-xs sm:text-sm font-medium transition-colors"
+              className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-primary/5 px-4 py-5 text-sm font-semibold transition-all duration-200"
             >
               <span className="hidden sm:inline">Actions</span>
               <span className="sm:hidden">Help</span>
             </TabsTrigger>
             <TabsTrigger
               value="chat"
-              className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-muted/50 px-2 py-4 text-xs sm:text-sm font-medium transition-colors"
+              className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-primary/5 px-4 py-5 text-sm font-semibold transition-all duration-200"
             >
               <span className="hidden sm:inline">Chat</span>
               <span className="sm:hidden">Q&A</span>
@@ -428,20 +477,20 @@ export function ResultsDisplay({
           </TabsList>
 
           {/* Tab Content */}
-          <div className="p-4 sm:p-6">
-            <TabsContent value="summary" className="mt-0 space-y-4">
+          <div className="p-5 sm:p-8">
+            <TabsContent value="summary" className="mt-0 space-y-4 animate-fade-in-up">
               <SummaryTab />
             </TabsContent>
-            <TabsContent value="details" className="mt-0 space-y-3">
+            <TabsContent value="details" className="mt-0 space-y-4 animate-fade-in-up">
               <DetailsTab />
             </TabsContent>
-            <TabsContent value="terms" className="mt-0 space-y-3">
+            <TabsContent value="terms" className="mt-0 space-y-4 animate-fade-in-up">
               <TermsTab />
             </TabsContent>
-            <TabsContent value="actions" className="mt-0">
+            <TabsContent value="actions" className="mt-0 animate-fade-in-up">
               <ActionsTab />
             </TabsContent>
-            <TabsContent value="chat" className="mt-0">
+            <TabsContent value="chat" className="mt-0 animate-fade-in-up">
               {chatTabContent}
             </TabsContent>
           </div>
@@ -449,21 +498,21 @@ export function ResultsDisplay({
       </Tabs>
 
       {/* Action Buttons - Bottom */}
-      <div className="flex gap-2 sm:gap-3 flex-wrap">
+      <div className="flex gap-3 sm:gap-4 flex-wrap">
         <Button
           onClick={() => handleCopy(results.interpretation.summary, 'summary')}
           variant="outline"
-          className="flex-1 rounded-full h-10 gap-2"
+          className="flex-1 rounded-full h-12 gap-2 border-2 hover:bg-muted/50 transition-all duration-200"
         >
           {copiedTab === 'summary' ? (
             <>
-              <CheckCircle2 className="h-4 w-4 text-green-600" aria-hidden="true" />
-              <span className="hidden sm:inline">Copied</span>
+              <CheckCircle2 className="h-5 w-5 text-green-600" aria-hidden="true" />
+              <span className="font-semibold">Copied!</span>
             </>
           ) : (
             <>
-              <Copy className="h-4 w-4" aria-hidden="true" />
-              <span className="hidden sm:inline">Copy</span>
+              <Copy className="h-5 w-5" aria-hidden="true" />
+              <span className="font-semibold">Copy</span>
             </>
           )}
         </Button>
@@ -479,10 +528,10 @@ export function ResultsDisplay({
             document.body.removeChild(element);
           }}
           variant="outline"
-          className="flex-1 rounded-full h-10 gap-2"
+          className="flex-1 rounded-full h-12 gap-2 border-2 hover:bg-muted/50 transition-all duration-200"
         >
-          <Download className="h-4 w-4" aria-hidden="true" />
-          <span className="hidden sm:inline">Download</span>
+          <Download className="h-5 w-5" aria-hidden="true" />
+          <span className="font-semibold">Download</span>
         </Button>
         <Button
           onClick={() => {
@@ -497,10 +546,10 @@ export function ResultsDisplay({
             }
           }}
           variant="outline"
-          className="flex-1 rounded-full h-10 gap-2"
+          className="flex-1 rounded-full h-12 gap-2 border-2 hover:bg-muted/50 transition-all duration-200"
         >
-          <Share2 className="h-4 w-4" aria-hidden="true" />
-          <span className="hidden sm:inline">Share</span>
+          <Share2 className="h-5 w-5" aria-hidden="true" />
+          <span className="font-semibold">Share</span>
         </Button>
       </div>
     </div>

@@ -8,9 +8,12 @@ import {
   AlertCircle,
   X,
   CheckCircle2,
+  Sparkles,
+  ArrowRight,
 } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Button } from '@/components/ui/button';
 import { validateFile } from '@/lib/api-client';
 
 interface DocumentUploadProps {
@@ -172,11 +175,11 @@ export function DocumentUpload({
         onDragOver={handleDrag}
         onDrop={handleDrop}
         className={`
-          relative border-[1.5px] border-dashed rounded-2xl
-          transition-all duration-200 cursor-pointer
+          relative border-2 border-dashed rounded-2xl
+          transition-all duration-300 cursor-pointer
           ${dragActive
-            ? 'border-primary bg-primary/5'
-            : 'border-border bg-card hover:border-primary/40 hover:bg-muted/30'
+            ? 'border-primary bg-primary/10 scale-[1.02]'
+            : 'border-border/60 bg-card hover:border-primary/40 hover:bg-muted/30 hover:shadow-lg'
           }
         `}
       >
@@ -190,55 +193,35 @@ export function DocumentUpload({
           aria-label="Upload document"
         />
 
-        {/* Desktop: horizontal row | Mobile: stacked center */}
-        <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 p-4 sm:p-5">
-
-          {/* Icon + text */}
-          <div className="flex items-center gap-3 flex-1 justify-center sm:justify-start">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 flex-shrink-0">
-              <Upload className="h-4.5 w-4.5 text-primary" aria-hidden="true" />
+        <div className="flex flex-col sm:flex-row sm:items-center gap-4 p-5 sm:p-6">
+          <div className="flex items-center gap-4 flex-1 justify-center sm:justify-start">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-primary/20 to-blue-500/20 flex-shrink-0">
+              <Upload className="h-5 w-5 text-primary" aria-hidden="true" />
             </div>
             <div>
-              <p className="text-sm font-medium text-foreground">Upload another document</p>
-              <p className="text-xs text-muted-foreground">Drag and drop or use the buttons</p>
+              <p className="text-base font-semibold text-foreground">Upload another document</p>
+              <p className="text-sm text-muted-foreground">Drag and drop or use the buttons</p>
             </div>
           </div>
 
-          {/* Action buttons — Google style: text-only primary, icon+text secondary */}
-          <div className="flex gap-2 justify-center sm:justify-end flex-shrink-0">
-            <button
+          <div className="flex gap-3 justify-center sm:justify-end flex-shrink-0">
+            <Button
               onClick={() => fileInputRef.current?.click()}
               disabled={isLoading}
-              className="
-                inline-flex items-center justify-center
-                h-9 px-5 rounded-full
-                bg-primary text-white text-sm font-medium
-                transition-all duration-200 ease-out
-                hover:bg-primary/85 hover:shadow-md hover:shadow-primary/20
-                active:scale-[0.97]
-                disabled:opacity-50 disabled:cursor-not-allowed
-                focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2
-              "
+              className="rounded-full h-11 px-6 bg-gradient-to-r from-primary to-blue-600 text-white font-semibold shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30 transition-all duration-200"
             >
+              <Upload className="h-4 w-4 mr-2" />
               Upload
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={startCamera}
               disabled={isLoading}
-              className="
-                inline-flex items-center justify-center gap-1.5
-                h-9 px-5 rounded-full
-                border border-border bg-transparent text-foreground text-sm font-medium
-                transition-all duration-200 ease-out
-                hover:bg-muted/40
-                active:scale-[0.97]
-                disabled:opacity-50 disabled:cursor-not-allowed
-                focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-border focus-visible:ring-offset-2
-              "
+              variant="outline"
+              className="rounded-full h-11 px-6 border-2"
             >
-              <Camera className="h-4 w-4" aria-hidden="true" />
+              <Camera className="h-4 w-4 mr-2" />
               Camera
-            </button>
+            </Button>
           </div>
         </div>
       </Card>
@@ -251,48 +234,48 @@ export function DocumentUpload({
   // ══════════════════════════════════════════════════════
   if (preview && fileName) {
     return (
-      <Card className="
-        border-0 rounded-2xl bg-card
-        shadow-[0_1px_3px_rgba(0,0,0,0.07)]
-        overflow-hidden
-      ">
-        {/* Top bar: green check + filename + dismiss */}
-        <div className="flex items-center justify-between px-5 pt-5 pb-3">
-          <div className="flex items-center gap-3 min-w-0 flex-1">
-            {/* Green tonal circle — secondary = Google Green = success */}
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-secondary/10 flex-shrink-0">
-              <CheckCircle2 className="h-5 w-5 text-secondary" aria-hidden="true" />
+      <Card className={`
+        border-0 rounded-3xl bg-gradient-to-br from-card to-muted/30
+        shadow-xl overflow-hidden
+        animate-fade-in-up
+      `}>
+        {/* Top bar with gradient */}
+        <div className="flex items-center justify-between px-6 pt-6 pb-4 bg-gradient-to-r from-primary/10 to-transparent">
+          <div className="flex items-center gap-4 min-w-0 flex-1">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-secondary/20 to-green-500/20 flex-shrink-0">
+              <CheckCircle2 className="h-6 w-6 text-secondary" aria-hidden="true" />
             </div>
             <div className="min-w-0 flex-1">
-              <p className="text-sm font-medium text-foreground truncate">{fileName}</p>
-              <p className="text-xs text-muted-foreground">Ready to analyze</p>
+              <p className="text-base font-semibold text-foreground truncate">{fileName}</p>
+              <p className="text-sm text-muted-foreground flex items-center gap-1">
+                <Sparkles className="h-3 w-3 text-primary" />
+                Ready to analyze
+              </p>
             </div>
           </div>
 
-          {/* Dismiss — ghost X */}
           <button
             onClick={() => { setPreview(null); setFileName(null); }}
             className="
-              flex h-8 w-8 items-center justify-center rounded-full flex-shrink-0
+              flex h-10 w-10 items-center justify-center rounded-full
               text-muted-foreground
               hover:bg-muted/50 hover:text-foreground
-              transition-colors duration-150
+              transition-all duration-200
+              hover:scale-110
               focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-border focus-visible:ring-offset-2
             "
             aria-label="Remove document"
           >
-            <X className="h-4 w-4" aria-hidden="true" />
+            <X className="h-5 w-5" aria-hidden="true" />
           </button>
         </div>
 
-        {/* Preview image */}
-        <div className="px-5 pb-5">
-          <div className="rounded-xl bg-muted border border-border overflow-hidden aspect-[4/3] flex items-center justify-center">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
+        <div className="px-6 pb-6">
+          <div className="rounded-2xl bg-gradient-to-br from-muted/50 to-muted overflow-hidden aspect-[4/3] flex items-center justify-center border border-border/50 shadow-inner">
             <img
               src={preview}
               alt="Document preview"
-              className="max-w-full max-h-full object-contain"
+              className="max-w-full max-h-full object-contain shadow-lg rounded-xl"
             />
           </div>
         </div>
@@ -306,40 +289,40 @@ export function DocumentUpload({
   // ══════════════════════════════════════════════════════
   if (cameraActive) {
     return (
-      <Card className="
-        border-0 rounded-2xl bg-card
-        shadow-[0_1px_3px_rgba(0,0,0,0.07)]
-        overflow-hidden
-      ">
-        <div className="p-5">
-          {/* Header row */}
-          <div className="flex items-center justify-between mb-4">
-            <p className="text-base font-medium text-foreground">Camera</p>
+      <Card className={`
+        border-0 rounded-3xl bg-gradient-to-br from-card to-muted/30
+        shadow-xl overflow-hidden
+        animate-fade-in-up
+      `}>
+        <div className="p-6">
+          <div className="flex items-center justify-between mb-6">
+            <p className="text-xl font-bold text-foreground flex items-center gap-2">
+              <Camera className="h-5 w-5 text-primary" />
+              Camera
+            </p>
             <button
               onClick={stopCamera}
               className="
-                flex h-8 w-8 items-center justify-center rounded-full
+                flex h-10 w-10 items-center justify-center rounded-full
                 text-muted-foreground
                 hover:bg-muted/50 hover:text-foreground
-                transition-colors duration-150
-                focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-border focus-visible:ring-offset-2
+                transition-all duration-200
+                hover:scale-110
               "
               aria-label="Close camera"
             >
-              <X className="h-4 w-4" aria-hidden="true" />
+              <X className="h-5 w-5" aria-hidden="true" />
             </button>
           </div>
 
-          {/* Camera error */}
           {cameraError && (
-            <Alert variant="destructive" className="rounded-xl border-destructive/30 bg-destructive/5 mb-4">
+            <Alert variant="destructive" className="rounded-2xl border-destructive/30 bg-destructive/10 mb-6">
               <AlertCircle className="h-4 w-4" />
               <AlertDescription className="text-destructive text-sm">{cameraError}</AlertDescription>
             </Alert>
           )}
 
-          {/* Video feed */}
-          <div className="rounded-xl bg-black overflow-hidden aspect-video mb-5">
+          <div className="rounded-2xl bg-gradient-to-br from-black to-gray-900 overflow-hidden aspect-video mb-6 shadow-inner">
             <video
               ref={videoRef}
               autoPlay
@@ -350,37 +333,21 @@ export function DocumentUpload({
             <canvas ref={canvasRef} className="hidden" />
           </div>
 
-          {/* Action buttons — Google style */}
-          <div className="flex gap-3">
-            <button
+          <div className="flex gap-4">
+            <Button
               onClick={stopCamera}
-              className="
-                flex-1 inline-flex items-center justify-center
-                h-11 rounded-full
-                border border-border bg-transparent text-foreground text-sm font-medium
-                transition-all duration-200 ease-out
-                hover:bg-muted/40
-                active:scale-[0.97]
-                focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-border focus-visible:ring-offset-2
-              "
+              variant="outline"
+              className="flex-1 rounded-full h-12 text-base font-semibold border-2"
             >
               Cancel
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={takePhoto}
-              className="
-                flex-1 inline-flex items-center justify-center gap-2
-                h-11 rounded-full
-                bg-primary text-white text-sm font-medium
-                transition-all duration-200 ease-out
-                hover:bg-primary/85 hover:shadow-lg hover:shadow-primary/25
-                active:scale-[0.97]
-                focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2
-              "
+              className="flex-1 rounded-full h-12 text-base font-semibold bg-gradient-to-r from-primary to-blue-600 shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30 transition-all duration-200"
             >
-              <Camera className="h-4.5 w-4.5" aria-hidden="true" />
+              <Camera className="h-5 w-5 mr-2" />
               Capture
-            </button>
+            </Button>
           </div>
         </div>
       </Card>
@@ -392,27 +359,26 @@ export function DocumentUpload({
   // DEFAULT — main upload zone
   // ══════════════════════════════════════════════════════
   return (
-    <div className="space-y-4">
-      {/* Error */}
+    <div className="space-y-6">
       {error && (
-        <Alert variant="destructive" className="rounded-xl border-destructive/30 bg-destructive/5">
+        <Alert variant="destructive" className="rounded-2xl border-destructive/30 bg-destructive/10">
           <AlertCircle className="h-4 w-4" />
           <AlertDescription className="text-destructive text-sm">{error}</AlertDescription>
         </Alert>
       )}
 
-      {/* Drop zone */}
       <Card
         onDragEnter={handleDrag}
         onDragLeave={handleDrag}
         onDragOver={handleDrag}
         onDrop={handleDrop}
         className={`
-          relative border-[1.5px] border-dashed rounded-2xl
-          transition-all duration-200 cursor-pointer
+          relative border-2 border-dashed rounded-3xl
+          transition-all duration-300 cursor-pointer
+          overflow-hidden
           ${dragActive
-            ? 'border-primary bg-primary/5'
-            : 'border-border bg-card hover:border-primary/40'
+            ? 'border-primary bg-primary/10 scale-[1.02] shadow-2xl shadow-primary/20'
+            : 'border-border/60 bg-gradient-to-br from-card to-muted/30 hover:border-primary/40 hover:shadow-xl'
           }
         `}
       >
@@ -426,74 +392,105 @@ export function DocumentUpload({
           aria-label="Upload document"
         />
 
-        <div className="text-center py-12 sm:py-16 px-6">
+        <div className="text-center py-16 sm:py-20 px-6 relative">
+          {/* Animated background blobs */}
+          {dragActive && (
+            <>
+              <div className="absolute top-10 left-1/4 w-32 h-32 bg-primary/20 blur-3xl rounded-full animate-pulse" />
+              <div className="absolute bottom-10 right-1/4 w-40 h-40 bg-secondary/20 blur-3xl rounded-full animate-pulse" />
+            </>
+          )}
 
-          {/* Tonal icon circle — matches Google's pattern */}
-          <div className="flex justify-center mb-6">
-            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/10">
-              <Upload className="h-6 w-6 text-primary" aria-hidden="true" />
+          <div className="relative z-10">
+            {/* Animated icon circle */}
+            <div className={`
+              flex justify-center mb-8
+              transition-all duration-300
+              ${dragActive ? 'scale-125' : 'scale-100 hover:scale-110'}
+            `}>
+              <div className={`
+                flex h-20 w-20 items-center justify-center rounded-3xl
+                bg-gradient-to-br from-primary/20 to-blue-500/20
+                shadow-lg shadow-primary/20
+                transition-all duration-300
+                ${dragActive ? 'bg-primary/30 shadow-primary/40' : ''}
+              `}>
+                {isLoading ? (
+                  <div className="h-10 w-10 border-4 border-primary/30 border-t-primary rounded-full animate-spin" />
+                ) : (
+                  <Upload className="h-10 w-10 text-primary" aria-hidden="true" />
+                )}
+              </div>
             </div>
-          </div>
 
-          {/* Text — Google uses light font-weight (400) for large headings */}
-          <h3 className="text-xl sm:text-2xl font-normal text-foreground mb-2 tracking-tight">
-            Upload your medical document
-          </h3>
-          <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
-            Drag and drop here, or use the buttons below
-          </p>
-          <p className="text-xs sm:text-sm text-muted-foreground mt-2">
-            Supports JPG, PNG, or PDF · Up to 10 MB
-          </p>
+            <h3 className="text-2xl sm:text-3xl font-bold text-foreground mb-3 tracking-tight">
+              Upload your medical document
+            </h3>
+            <p className="text-lg text-muted-foreground leading-relaxed max-w-md mx-auto">
+              Drag and drop here, or{' '}
+              <span className="text-primary font-semibold">browse files</span>
+            </p>
+            <p className="text-base text-muted-foreground/70 mt-3 flex items-center justify-center gap-2">
+              <span className="px-3 py-1 bg-muted rounded-full text-sm">JPG</span>
+              <span className="text-muted-foreground">•</span>
+              <span className="px-3 py-1 bg-muted rounded-full text-sm">PNG</span>
+              <span className="text-muted-foreground">•</span>
+              <span className="px-3 py-1 bg-muted rounded-full text-sm">PDF</span>
+              <span className="text-muted-foreground ml-2">•</span>
+              <span className="text-sm">Up to 10 MB</span>
+            </p>
 
-          {/* Buttons — Google style: primary filled, secondary outlined */}
-          <div className="flex flex-col sm:flex-row gap-3 justify-center mt-8">
-            {/* Primary button */}
-            <button
-              onClick={() => fileInputRef.current?.click()}
-              disabled={isLoading}
-              className="
-                inline-flex items-center justify-center gap-2
-                h-12 px-7 rounded-full
-                bg-primary text-white text-sm font-medium
-                transition-all duration-200 ease-out
-                hover:bg-primary/85 hover:shadow-lg hover:shadow-primary/25
-                active:scale-[0.97]
-                focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2
-                disabled:opacity-50 disabled:cursor-not-allowed
-              "
-            >
-              {isLoading ? (
-                <>
-                  <span className="h-4 w-4 border-2 border-white/40 border-t-white rounded-full animate-spin" aria-hidden="true" />
-                  Processing…
-                </>
-              ) : (
-                <>
-                  <FileText className="h-4.5 w-4.5" aria-hidden="true" />
-                  Browse files
-                </>
-              )}
-            </button>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center mt-10">
+              <Button
+                onClick={() => fileInputRef.current?.click()}
+                disabled={isLoading}
+                className="
+                  inline-flex items-center justify-center gap-2
+                  h-14 px-10 rounded-full
+                  bg-gradient-to-r from-primary to-blue-600
+                  text-white text-base font-semibold
+                  shadow-xl shadow-primary/25
+                  hover:shadow-2xl hover:shadow-primary/30
+                  hover:scale-105
+                  active:scale-[0.98]
+                  transition-all duration-200
+                  disabled:opacity-50 disabled:cursor-not-allowed
+                "
+              >
+                {isLoading ? (
+                  <>
+                    <div className="h-5 w-5 border-2 border-white/40 border-t-white rounded-full animate-spin" />
+                    Processing…
+                  </>
+                ) : (
+                  <>
+                    <FileText className="h-5 w-5" />
+                    Browse files
+                    <ArrowRight className="h-4 w-4 ml-1" />
+                  </>
+                )}
+              </Button>
 
-            {/* Secondary button */}
-            <button
-              onClick={startCamera}
-              disabled={isLoading}
-              className="
-                inline-flex items-center justify-center gap-2
-                h-12 px-7 rounded-full
-                border border-border bg-transparent text-foreground text-sm font-medium
-                transition-all duration-200 ease-out
-                hover:bg-muted/40
-                active:scale-[0.97]
-                focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-border focus-visible:ring-offset-2
-                disabled:opacity-50 disabled:cursor-not-allowed
-              "
-            >
-              <Camera className="h-4.5 w-4.5" aria-hidden="true" />
-              Open camera
-            </button>
+              <Button
+                onClick={startCamera}
+                disabled={isLoading}
+                variant="outline"
+                className="
+                  inline-flex items-center justify-center gap-2
+                  h-14 px-10 rounded-full
+                  border-2 border-border/60
+                  text-base font-semibold
+                  hover:bg-muted/50
+                  hover:scale-105
+                  active:scale-[0.98]
+                  transition-all duration-200
+                  disabled:opacity-50 disabled:cursor-not-allowed
+                "
+              >
+                <Camera className="h-5 w-5" />
+                Open camera
+              </Button>
+            </div>
           </div>
         </div>
       </Card>
