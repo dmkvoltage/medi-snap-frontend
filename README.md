@@ -1,4 +1,4 @@
-# MediSnap - Medical Document Translator
+# Med8id - Medical Document Translator
 
 <div align="center">
 
@@ -12,14 +12,14 @@ A privacy-first, AI-powered Progressive Web Application that helps patients unde
 
 ---
 
-## About MediSnap
+## About Med8id
 
-MediSnap solves a critical healthcare problem: **medical jargon is confusing**. Patients often receive medical documents they don't understand, leading to:
+Med8id solves a critical healthcare problem: **medical jargon is confusing**. Patients often receive medical documents they don't understand, leading to:
 - Anxiety and stress
 - Poor adherence to medical advice
 - Miscommunication with healthcare providers
 
-MediSnap instantly translates complex medical terminology into clear, simple language while prioritizing **absolute privacy** - your medical documents are never stored or archived.
+Med8id instantly translates complex medical terminology into clear, simple language while prioritizing **absolute privacy** - your medical documents are never stored or archived.
 
 ### Who Is This For?
 
@@ -126,7 +126,7 @@ MediSnap instantly translates complex medical terminology into clear, simple lan
 
 ### For Users
 
-1. Visit [MediSnap App](#)
+1. Visit [Med8id App](#)
 2. Click "Get Started Now"
 3. Upload your medical document (camera or file)
 4. Click "Translate Document"
@@ -140,7 +140,7 @@ MediSnap instantly translates complex medical terminology into clear, simple lan
 ```bash
 # Clone the repository
 git clone <repository-url>
-cd medisnap-frontend
+cd Med8id-frontend
 
 # Install dependencies
 npm install
@@ -156,7 +156,7 @@ cp .env.example .env.local
 
 # Edit .env.local with your backend API URL
 # NEXT_PUBLIC_API_URL=http://localhost:8000/api  # Development
-# NEXT_PUBLIC_API_URL=https://api.medisnap.app   # Production
+# NEXT_PUBLIC_API_URL=https://api.Med8id.app   # Production
 ```
 
 #### 3. Development Server
@@ -179,7 +179,7 @@ npm run start
 ## 📁 Project Structure
 
 ```
-medisnap-frontend/
+Med8id-frontend/
 ├── app/
 │   ├── layout.tsx              # Root layout with metadata & fonts
 │   ├── page.tsx                # Main app - state management & routing
@@ -389,10 +389,10 @@ vercel
 ### Docker
 ```bash
 # Build image
-docker build -t medisnap-frontend .
+docker build -t Med8id-frontend .
 
 # Run container
-docker run -p 3000:3000 medisnap-frontend
+docker run -p 3000:3000 Med8id-frontend
 ```
 
 ### Self-Hosted
@@ -404,7 +404,7 @@ npm run build
 npm run start
 
 # Or use process manager (PM2)
-pm2 start npm --name "medisnap" -- start
+pm2 start npm --name "Med8id" -- start
 ```
 
 ### Environment Setup
@@ -461,7 +461,7 @@ A: Currently, you need internet for document processing. Future versions will su
 A: JPG, PNG, and PDF files up to 10MB. Camera photos are captured in real-time.
 
 **Q: Is this a replacement for medical advice?**
-A: No. MediSnap helps you understand documents but is NOT a substitute for consulting healthcare providers.
+A: No. Med8id helps you understand documents but is NOT a substitute for consulting healthcare providers.
 
 **Q: Can I save or download my results?**
 A: Yes! In the Results tab, use the Download button to save as a text file.
@@ -559,7 +559,7 @@ MIT License - see LICENSE file for details
 
 ## ⚠️ Disclaimer
 
-**MediSnap is not a substitute for professional medical advice.** Results are for informational purposes only. Always consult with a healthcare provider for medical concerns, diagnoses, and treatment decisions.
+**Med8id is not a substitute for professional medical advice.** Results are for informational purposes only. Always consult with a healthcare provider for medical concerns, diagnoses, and treatment decisions.
 
 ## 🚀 Roadmap
 
@@ -626,13 +626,13 @@ This means you can:
 
 **IMPORTANT - Please Read:**
 
-MediSnap is NOT:
+Med8id is NOT:
 - A substitute for professional medical advice
 - A diagnostic tool
 - Licensed medical software
 - FDA-approved or regulated
 
-MediSnap IS:
+Med8id IS:
 - An educational tool
 - A document interpretation aid
 - A reading comprehension helper
@@ -643,7 +643,7 @@ MediSnap IS:
 - Medication changes
 - Emergency situations
 
-By using MediSnap, you agree to these terms and understand the limitations.
+By using Med8id, you agree to these terms and understand the limitations.
 
 ---
 
@@ -654,7 +654,7 @@ By using MediSnap, you agree to these terms and understand the limitations.
 - **Documentation**: Check [APP_FLOW_EXPLAINED.md](./APP_FLOW_EXPLAINED.md)
 - **Issues**: [GitHub Issues](issues)
 - **Discussions**: [GitHub Discussions](discussions)
-- **Email**: support@medisnap.app
+- **Email**: support@Med8id.app
 
 ### Report Issues
 
@@ -684,6 +684,6 @@ Have an idea? [Submit a feature request](issues)!
 
 **Made with care for better healthcare understanding**
 
-[Back to top](#medisnap---medical-document-translator)
+[Back to top](#Med8id---medical-document-translator)
 
 </div>

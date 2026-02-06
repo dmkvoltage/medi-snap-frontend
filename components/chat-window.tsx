@@ -212,7 +212,7 @@ export function ChatWindow({
               </div>
               <div className="leading-tight">
                 <p className="text-xs text-white/80">Chat with</p>
-                <p className="text-sm sm:text-base font-semibold">MediSnap AI</p>
+                <p className="text-sm sm:text-base font-semibold">Med8d AI</p>
               </div>
             </div>
             <div className="flex items-center gap-2 text-white/80">

@@ -21,6 +21,13 @@ export default function RecentResultsPage() {
   const [error, setError] = useState<string | null>(null);
   const [asking, setAsking] = useState(false);
   const [language, setLanguage] = useState('en');
+  const [defaultTab, setDefaultTab] = useState('summary');
+
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.location.hash === '#chat') {
+      setDefaultTab('chat');
+    }
+  }, []);
 
   useEffect(() => {
     if (!authLoading && !isAuthenticated) {
@@ -145,6 +152,7 @@ export default function RecentResultsPage() {
           onNewDocument={handleNewDocument}
           onAsking={handleAskQuestion}
           isAsking={asking}
+          defaultTab={defaultTab}
         />
 
         {/* Action Cards */}

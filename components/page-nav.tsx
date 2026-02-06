@@ -28,6 +28,7 @@ export function PageNav({ className }: PageNavProps) {
     ? [
         ...visibleItems, 
         { href: '/recent', label: 'Results', public: false },
+        { href: '/chat', label: 'Chat', public: false },
         { href: '/dashboard', label: 'History', public: false }
       ]
     : visibleItems;

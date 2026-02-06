@@ -66,9 +66,14 @@ export default function InterpretationPage() {
 
   if (authLoading || (loading && !results && !error)) {
     return (
-      <div className="flex h-screen items-center justify-center">
+      <PageShell
+        title="Loading Interpretation"
+        description="Retrieving your analysis..."
+        language={language}
+        onLanguageChange={setLanguage}
+      >
         <LoadingState />
-      </div>
+      </PageShell>
     );
   }
 

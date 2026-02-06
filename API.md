@@ -1,16 +1,16 @@
-# MediSnap API Integration Guide
+# Med8id API Integration Guide
 
-Complete documentation for integrating the MediSnap Frontend with the backend API.
+Complete documentation for integrating the Med8id Frontend with the backend API.
 
 ## Overview
 
-The MediSnap Frontend communicates with a Django REST API backend to process medical documents. This guide explains all API endpoints, request/response formats, and error handling.
+The Med8id Frontend communicates with a Django REST API backend to process medical documents. This guide explains all API endpoints, request/response formats, and error handling.
 
 ## Base URL
 
 ```
 Development:  http://localhost:8000/api
-Production:   https://api.medisnap.app/api
+Production:   https://api.Med8id.app/api
 ```
 
 Set via environment variable:
@@ -295,8 +295,8 @@ The backend must configure CORS to allow requests from the frontend:
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",        # Development
     "http://localhost:3001",        # Alternative dev port
-    "https://medisnap.app",         # Production
-    "https://www.medisnap.app",     # Production with www
+    "https://Med8id.app",         # Production
+    "https://www.Med8id.app",     # Production with www
 ]
 
 CORS_ALLOW_CREDENTIALS = True
@@ -488,7 +488,7 @@ For API issues:
 2. Review error messages carefully
 3. Test with curl or Postman
 4. Check backend logs
-5. Contact support@medisnap.app
+5. Contact support@Med8id.app
 
 ---
 

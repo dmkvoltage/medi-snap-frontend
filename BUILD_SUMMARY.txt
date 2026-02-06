@@ -1,5 +1,5 @@
 ╔════════════════════════════════════════════════════════════════════════════╗
-║                  MEDISNAP FRONTEND - BUILD COMPLETE ✅                      ║
+║                  Med8id FRONTEND - BUILD COMPLETE ✅                      ║
 ╚════════════════════════════════════════════════════════════════════════════╝
 
 🎉 A COMPLETE, PRODUCTION-READY NEXT.JS APPLICATION HAS BEEN BUILT
@@ -286,8 +286,8 @@
       vercel --prod
 
    2. DOCKER:
-      docker build -t medisnap .
-      docker run -p 3000:3000 medisnap
+      docker build -t Med8id .
+      docker run -p 3000:3000 Med8id
 
    3. SELF-HOSTED:
       npm run build

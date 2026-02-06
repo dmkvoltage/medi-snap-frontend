@@ -28,22 +28,22 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'MediSnap - Medical Document Translator',
+  title: 'Med8d - Medical Document Translator',
   description: 'Instantly translate complex medical documents into plain language using AI. Privacy-first PWA with zero data persistence.',
-  generator: 'MediSnap',
+  generator: 'Med8d',
   keywords: ['medical', 'document', 'translation', 'AI', 'healthcare', 'privacy'],
-  authors: [{ name: 'MediSnap' }],
+  authors: [{ name: 'Med8d' }],
   openGraph: {
     type: 'website',
     locale: 'en_US',
-    url: 'https://medisnap.app',
-    siteName: 'MediSnap',
-    title: 'MediSnap - Medical Document Translator',
+    url: 'https://med8d.app',
+    siteName: 'Med8d',
+    title: 'Med8d - Medical Document Translator',
     description: 'Instantly translate complex medical documents into plain language',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'MediSnap',
+    title: 'Med8d',
     description: 'Medical document translator powered by AI',
   },
   icons: {

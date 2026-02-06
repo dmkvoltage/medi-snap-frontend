@@ -1,16 +1,6 @@
 'use client';
 
-// Reuse the same colored wordmark structure as the header
-const logoLetters = [
-  { char: 'M', color: 'text-primary' },
-  { char: 'e', color: 'text-destructive' },
-  { char: 'd', color: 'text-accent' },
-  { char: 'i', color: 'text-secondary' },
-  { char: 'S', color: 'text-primary' },
-  { char: 'n', color: 'text-destructive' },
-  { char: 'a', color: 'text-accent' },
-  { char: 'p', color: 'text-secondary' },
-];
+import { LogoWordmark } from '@/components/logo-wordmark';
 
 const footerLinks = [
   { label: 'Privacy Policy', href: '#privacy' },
@@ -35,13 +25,7 @@ export function Footer() {
         ">
 
           {/* Wordmark — same colored logo as header */}
-          <span className="text-lg font-semibold tracking-[-0.02em] leading-none flex-shrink-0">
-            {logoLetters.map((letter, i) => (
-              <span key={i} className={letter.color}>
-                {letter.char}
-              </span>
-            ))}
-          </span>
+          <LogoWordmark size="sm" className="flex-shrink-0" />
 
           {/* Links — inline row, muted text, hover to primary */}
           <nav className="flex items-center gap-5 sm:gap-6" aria-label="Footer">
@@ -62,7 +46,7 @@ export function Footer() {
 
           {/* Copyright */}
           <p className="text-sm text-muted-foreground flex-shrink-0">
-            © {currentYear} MediSnap
+            © {currentYear} Med8d
           </p>
         </div>
 
@@ -72,7 +56,7 @@ export function Footer() {
         <div className="border-t border-border pt-5 pb-6 sm:pb-8">
           <p className="text-xs text-muted-foreground leading-relaxed max-w-2xl mx-auto text-center">
             <span className="font-medium text-foreground">Disclaimer:</span>{' '}
-            MediSnap provides general medical information only and is not a substitute
+            Med8d provides general medical information only and is not a substitute
             for professional medical advice. Always consult your healthcare provider
             for medical concerns.
           </p>

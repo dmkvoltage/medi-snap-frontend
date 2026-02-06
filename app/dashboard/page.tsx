@@ -12,6 +12,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Header } from '@/components/header';
+import { Footer } from '@/components/footer';
+import { PageNav } from '@/components/page-nav';
 import { useAuth } from '@/lib/auth-context';
 import { getInterpretations, deleteInterpretation, downloadExport, InterpretationResponse } from '@/lib/api-client';
 
@@ -24,6 +27,7 @@ export default function DashboardPage() {
   const [typeFilter, setTypeFilter] = useState('all');
   const [page, setPage] = useState(1);
   const [pagination, setPagination] = useState({ total: 0, pages: 1 });
+  const [language, setLanguage] = useState('en');
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -69,12 +73,24 @@ export default function DashboardPage() {
   };
 
   if (authLoading || !isAuthenticated) {
-    return <div className="flex h-screen items-center justify-center"><Loader2 className="h-8 w-8 animate-spin" /></div>;
+    return (
+      <div className="min-h-screen flex flex-col bg-background page-transition">
+        <Header language={language} onLanguageChange={setLanguage} />
+        <PageNav className="mt-2" />
+        <main className="flex flex-1 items-center justify-center">
+          <Loader2 className="h-8 w-8 animate-spin" />
+        </main>
+        <Footer />
+      </div>
+    );
   }
 
   return (
-    <div className="min-h-screen bg-background p-4 sm:p-8">
-      <div className="mx-auto max-w-6xl space-y-8">
+    <div className="min-h-screen flex flex-col bg-background page-transition">
+      <Header language={language} onLanguageChange={setLanguage} />
+      <PageNav className="mt-2" />
+      <main className="flex-1 p-4 sm:p-8">
+        <div className="mx-auto max-w-6xl space-y-8">
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
           <div>
             <h1 className="text-3xl font-bold">Analysis History</h1>
@@ -206,7 +222,9 @@ export default function DashboardPage() {
             </Button>
           </div>
         )}
-      </div>
+        </div>
+      </main>
+      <Footer />
     </div>
   );
 }

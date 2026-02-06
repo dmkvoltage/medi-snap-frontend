@@ -83,13 +83,13 @@ export default function LoadingPage() {
 
   return (
     <PageShell
-      title="MediSnap Workflow"
-      description="Understanding how MediSnap transforms medical documents"
+      title="Med8d Workflow"
+      description="Understanding how Med8d transforms medical documents"
     >
       <div className="max-w-2xl mx-auto space-y-6">
         <Card>
           <CardHeader>
-            <CardTitle>How MediSnap Works</CardTitle>
+            <CardTitle>How Med8d Works</CardTitle>
             <CardDescription>
               Follow these steps to translate your medical documents into plain language
             </CardDescription>

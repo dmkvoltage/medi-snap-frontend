@@ -12,6 +12,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/lib/auth-context';
+import { LogoWordmark } from '@/components/logo-wordmark';
 
 interface HeaderProps {
   language?: string;
@@ -29,19 +30,6 @@ const languages = [
   { code: 'zh', name: '中文' },
   { code: 'ko', name: '한국어' },
   { code: 'ar', name: 'العربية' },
-];
-
-// Google colors each letter of "MediSnap" — cycling Blue, Red, Yellow, Green
-// exactly the way Google colors G-o-o-g-l-e
-const logoLetters = [
-  { char: 'M', color: 'text-primary' },      // Blue
-  { char: 'e', color: 'text-destructive' },   // Red
-  { char: 'd', color: 'text-accent' },        // Yellow
-  { char: 'i', color: 'text-secondary' },     // Green
-  { char: 'S', color: 'text-primary' },       // Blue
-  { char: 'n', color: 'text-destructive' },   // Red
-  { char: 'a', color: 'text-accent' },        // Yellow
-  { char: 'p', color: 'text-secondary' },     // Green
 ];
 
 export function Header({ language = 'en', onLanguageChange }: HeaderProps) {
@@ -70,14 +58,8 @@ export function Header({ language = 'en', onLanguageChange }: HeaderProps) {
         {/* ── Wordmark Logo ──
             No icon badge. The colored wordmark IS the logo,
             exactly like Google colors its own name. */}
-        <Link href="/" aria-label="MediSnap home" className="flex items-center">
-          <span className="text-xl sm:text-2xl font-semibold tracking-[-0.02em] leading-none">
-            {logoLetters.map((letter, i) => (
-              <span key={i} className={letter.color}>
-                {letter.char}
-              </span>
-            ))}
-          </span>
+        <Link href="/" aria-label="Med8d home" className="flex items-center">
+          <LogoWordmark size="sm" />
         </Link>
 
         {/* ── Language Selector ──
